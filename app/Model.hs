@@ -1,5 +1,8 @@
 module Model where
 
+import Data.List
+import Data.Maybe
+
 data Pixel = Int Int
 
 data Player
@@ -18,18 +21,58 @@ type Ghosts = [Player]
 
 data GhostColor = RED | ORANGE | PINK | CYAN deriving (Show, Eq)
 
+
+
+
+-- Tile interactions
 data Tile = Walkable Field (Int, Int) | NotWalkable WallType (Int, Int)
 
-data Field = Coin | Bonus | Empty | Dot deriving (Show, Eq)
+isWalkable :: Tile -> Bool
+isWalkable (Walkable field position) = True
+isWalkable _ = False
+
+isDot::Tile->Bool
+isDot (Walkable field _) | field==Dot=True | otherwise=False
+isDot _ = False
+
+-- Only the Walkable tiles have the field so no pm is required.
+setTileField::Tile->Field-> Tile
+setTileField (Walkable field position) nField = Walkable nField position
+setTileField t _ = t
+
+isConsumable::Tile->Bool
+isConsumable (Walkable field _) | field==Empty=False |field==DOOR=False | otherwise=True
+isConsumable _ = False
+
+
+
+data Field = Coin | Bonus | Empty | Dot | DOOR deriving (Show, Eq)
 
 type World = [Tile]
 
-data Direction = UP | DOWN | LEFT | RIGHT deriving (Show, Eq)
+countAmountOfDots::World->Int
+countAmountOfDots w = length $ filter (isDot) w
 
+getTileByPosition::GameState -> (Int, Int)->Tile
+--getTileByPosition gstate (x, y) = (world gstate) !! ((x) * 28 + y) TODO Debug!!!
+getTileByPosition gstate index = fromJust . find(isTile index) $ world gstate
+
+getTileIndexByPosition::GameState -> (Int, Int)->Int
+getTileIndexByPosition gstate index = fromJust . findIndex(isTile index) $ world gstate
+
+isTile::(Int, Int) -> Tile -> Bool
+isTile checkPos (Walkable field position) | checkPos == position = True | otherwise = False
+isTile checkPos (NotWalkable _ position) | checkPos == position = True | otherwise = False
+
+-- TODO: Make dynamic
+--getTilePosition::(Int, Int) -> Int
+--getTilePosition (x,y) = (((x) * 28) + y)
+
+data Direction = UP | DOWN | LEFT | RIGHT deriving (Show, Eq)
 data GhostState = Chase | Frightened | Scatter deriving (Show, Eq)
 
 -- TODO currently angled walls arent used
-data WallType = VERTICAL | LANGLE | RANGLE | HORIZONTAL | DOOR deriving (Show, Eq)
+data WallType = VERTICAL | LANGLE | RANGLE | HORIZONTAL deriving (Show, Eq)
 
 data GameState = GameState {player :: Player, world :: World, ghosts :: Ghosts, pause :: Bool, dotsLeft :: Int}
 
@@ -408,8 +451,8 @@ getDefaultWorld =
     Walkable Empty (11, 13),
     NotWalkable HORIZONTAL (12, 13),
     NotWalkable HORIZONTAL (13, 13),
-    NotWalkable DOOR (14, 13),
-    NotWalkable DOOR (15, 13),
+    Walkable DOOR (14, 13),
+    Walkable DOOR (15, 13),
     NotWalkable HORIZONTAL (16, 13),
     NotWalkable HORIZONTAL (17, 13),
     Walkable Empty (18, 13),
@@ -434,12 +477,12 @@ getDefaultWorld =
     Walkable Empty (9, 14),
     Walkable Empty (10, 14),
     Walkable Empty (11, 14),
-    NotWalkable HORIZONTAL (12, 14),
+    NotWalkable VERTICAL (12, 14),
     Walkable Empty (13, 14),
     Walkable Empty (14, 14),
     Walkable Empty (15, 14),
     Walkable Empty (16, 14),
-    NotWalkable HORIZONTAL (17, 14),
+    NotWalkable VERTICAL (17, 14),
     Walkable Empty (18, 14),
     Walkable Empty (19, 14),
     Walkable Empty (20, 14),
@@ -462,12 +505,12 @@ getDefaultWorld =
     NotWalkable HORIZONTAL (9, 15),
     Walkable Empty (10, 15),
     Walkable Empty (11, 15),
-    NotWalkable HORIZONTAL (12, 15),
+    NotWalkable VERTICAL (12, 15),
     Walkable Empty (13, 15),
     Walkable Empty (14, 15),
     Walkable Empty (15, 15),
     Walkable Empty (16, 15),
-    NotWalkable HORIZONTAL (17, 15),
+    NotWalkable VERTICAL   (17, 15),
     Walkable Empty (18, 15),
     Walkable Empty (19, 15),
     NotWalkable HORIZONTAL (20, 15),

@@ -1,4 +1,4 @@
-module File where
+module AssetManager where
 
 
 -- Standard Lib imports
@@ -16,7 +16,6 @@ import Graphics.Gloss.Juicy
 -- TODO: Making path relative
 -- TODO: https://hackage.haskell.org/package/reactive-banana-threepenny-0.7.1.3/src/src/Paths.hs
 path = "C:\\Users\\brand\\Documents\\UU\\FP\\Pacman\\pacman\\app\\assets\\"
-
 
 door = pngByFile "door.png"
 wVertical = pngByFile "vertical.png"

@@ -39,9 +39,9 @@ library
 executable pacman-exe
   main-is: Main.hs
   other-modules:
-      Paths_pacman Logic Model Rendering File
+      Paths_pacman Model Rendering AssetManager Logic.FrameTime Logic.Ghost Logic.Player Logic.World Controller
   hs-source-dirs:
-      app
+      app app/Logic
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
@@ -55,7 +55,7 @@ test-suite pacman-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Paths_pacman Logic Model Rendering File
+      Paths_pacman Model Rendering AssetManager Logic.FrameTime Logic.Ghost Logic.Player Logic.World Controller
   hs-source-dirs:
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N

@@ -1,14 +1,9 @@
 # Pac-Man
 
-
-
-
-
 ## TODO
 
 Pac-Man
-
- - [ ] Movement
+ - [x] Movement
  - [ ] Collecting dots
  - [ ] Collecting coins
  - [ ] Eating ghosts
@@ -21,3 +16,7 @@ Ghosts
  - [ ] Chase State
  - [ ] Frightened State
  - [ ] Scatter State
+
+
+
+# Running issues: If you get a GLUT related error, this seemed to solve the problem for us: https://stackoverflow.com/questions/8956387/cant-get-freeglut-to-work-with-haskell-on-windows
