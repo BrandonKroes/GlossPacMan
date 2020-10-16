@@ -18,10 +18,10 @@ initialGameState = GameState {
                                Ghost (16, 14) CYAN Chase
                               ],
                     world=getDefaultWorld,
-                    pause=True,
+                    pause=False,
                     dotsLeft=countAmountOfDots getDefaultWorld
                   }
 
 
 main :: IO ()
-main = play window black 20 initialGameState render inputHandler update
+main = play window black 5 initialGameState render inputHandler update
