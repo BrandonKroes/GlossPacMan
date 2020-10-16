@@ -8,12 +8,13 @@ updateWorld::GameState->GameState
 updateWorld gstate = detectingTilePlayerInteraction gstate
 
 -- Set coin count
--- setDotCount :: GameState -> Int -> GameState
--- setDotCount gstate dots = gstate {dotsLeft = dots}
+setDotCount :: GameState -> Int -> GameState
+setDotCount gstate dots = gstate {dotsLeft = dots}
 
 -- Decrease coin count
--- decreaseDotCount :: GameState -> GameState
--- decreaseDotCount gstate = setDotCount gstate $ (dotsLeft gstate) - 1
+decreaseDotCount :: GameState -> GameState
+decreaseDotCount gstate = setDotCount gstate $ (dotsLeft gstate) - 1
+
 detectingTilePlayerInteraction::GameState->GameState
 detectingTilePlayerInteraction gstate
   |isConsumable tile== True = gstate {world=nWorld}
