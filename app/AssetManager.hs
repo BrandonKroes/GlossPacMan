@@ -43,13 +43,6 @@ getDataFN name = do
 getFilePath::String -> FilePath
 getFilePath s = unsafePerformIO $ getDataFN s
 
-
-pngByIOPath::FilePath -> Picture
-pngByIOPath fp = dontDoThis $ loadJuicyJPG $ unsafePerformIO $ getDataFileName fp
-
-jpgByPath::FilePath -> Picture
-jpgByPath p = dontDoThis $ loadJuicyJPG (path ++ p)
-
 pngByFile::FilePath -> Picture
 pngByFile p = dontDoThis $ loadJuicyPNG $ getFilePath p
 
