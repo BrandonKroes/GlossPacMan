@@ -15,7 +15,7 @@ update currentFT gstate
 
     -- check if the game is paused
     -- TODO: Find out if YODA conditions are considered good practice in Haskell.
-    |True == pause gstate = gstate
+    | True == pause gstate = gstate
     | otherwise =
       updateWorld  $
       updateGhosts $
