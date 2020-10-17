@@ -2,14 +2,21 @@ module Rendering where
 
 import AssetManager
 import Graphics.Gloss
+import Graphics.Gloss.Interface.IO.Game
 import Model
 
 render :: GameState -> Picture
 -- TODO: Make Path dynamic
-render g = pictures $
+render g = pictures $ displayOverride g $
                       renderWorld g ++
                       [renderPlayer g] ++
                       renderGhosts g
+
+
+displayOverride::GameState -> [Picture] -> [Picture]
+displayOverride gstate pics | LOST == (runningState gstate) = [(translatePicture (0, 0) (color green (text "U LOSE")))]
+                            | WON  == (runningState gstate) = [(translatePicture (0, 0) (color green (text "U DID IT!!"))) ]
+                            | otherwise = pics
 
 
 renderPlayer :: GameState -> Picture
@@ -19,11 +26,11 @@ getPacManTexture :: Direction -> Picture
 getPacManTexture direction | direction==UP=pacmanUp | direction==DOWN=pacmanDown | direction==LEFT=pacmanLeft  | direction==RIGHT= pacmanRight
 
 getGhostTexture::GhostColor->GhostState->Picture
-getGhostTexture color state | state== Frightened = gFrightened | color==RED=gRed| color==PINK=gPink| color==CYAN=gCyan|color==ORANGE=gOrange
+getGhostTexture gcolor state | state== Frightened = gFrightened | gcolor==RED=gRed| gcolor==PINK=gPink| gcolor==CYAN=gCyan|gcolor==ORANGE=gOrange
 
 renderPlayerType :: Player -> Picture
 renderPlayerType (PacMan position score direction) = translatePlayerByPosition position $ getPacManTexture direction
-renderPlayerType (Ghost position color state ) = translatePlayerByPosition position $ getGhostTexture color state
+renderPlayerType (Ghost position gcolor state ) = translatePlayerByPosition position $ getGhostTexture gcolor state
 
 renderGhosts::GameState -> [Picture]
 renderGhosts g = map renderPlayerType $ ghosts g

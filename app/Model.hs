@@ -3,6 +3,23 @@ module Model where
 import Data.List
 import Data.Maybe
 
+
+data GameState = GameState {runningState::RunningState,
+                            player :: Player,
+                            world :: World,
+                            ghosts :: Ghosts,
+                            pause :: Bool,
+                            dotsLeft :: Int}
+
+
+--- RUNNING STATE
+
+data RunningState = START | RUNNING | WON | LOST deriving (Show, Eq)
+
+
+
+
+
 data Pixel = Int Int
 
 data Player
@@ -13,7 +30,7 @@ data Player
       }
   | Ghost
       { position :: (Int, Int),
-        color :: GhostColor,
+        gcolor :: GhostColor,
         state :: GhostState
       }
 
@@ -23,6 +40,11 @@ data GhostColor = RED | ORANGE | PINK | CYAN deriving (Show, Eq)
 
 
 
+getGhostsPosition::Ghosts->[(Int, Int)]
+getGhostsPosition ghosts = map getPlayerPosition ghosts
+
+getPlayerPosition::Player->(Int, Int)
+getPlayerPosition player = position player
 
 -- Tile interactions
 data Tile = Walkable Field (Int, Int) | NotWalkable WallType (Int, Int)
@@ -32,7 +54,7 @@ isWalkable (Walkable field position) = True
 isWalkable _ = False
 
 isDot::Tile->Bool
-isDot (Walkable field _) | field==Dot=True | otherwise=False
+isDot (Walkable field _) | field==Dot=True | field==Coin=True| otherwise=False
 isDot _ = False
 
 -- Only the Walkable tiles have the field so no pm is required.
@@ -74,7 +96,6 @@ data GhostState = Chase | Frightened | Scatter deriving (Show, Eq)
 -- TODO currently angled walls arent used
 data WallType = VERTICAL | LANGLE | RANGLE | HORIZONTAL deriving (Show, Eq)
 
-data GameState = GameState {player :: Player, world :: World, ghosts :: Ghosts, pause :: Bool, dotsLeft :: Int}
 
 boardWidth :: Int
 boardWidth = 28

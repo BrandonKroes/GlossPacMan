@@ -17,8 +17,8 @@ decreaseDotCount gstate = setDotCount gstate $ (dotsLeft gstate) - 1
 
 detectingTilePlayerInteraction::GameState->GameState
 detectingTilePlayerInteraction gstate
-  |isConsumable tile== True = gstate {world=nWorld}
-  |isConsumable tile== False = gstate {world=oWorld}
+  |isConsumable tile == True = decreaseDotCount $ gstate {world=nWorld}
+  |isConsumable tile == False = gstate {world=oWorld}
   |otherwise = gstate
     where
       tPosition = (position $ player gstate)
