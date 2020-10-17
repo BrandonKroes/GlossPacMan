@@ -24,4 +24,4 @@ initialGameState = GameState {
 
 
 main :: IO ()
-main = play window black 20 initialGameState render inputHandler update
+main = play window black 5 initialGameState render inputHandler update
