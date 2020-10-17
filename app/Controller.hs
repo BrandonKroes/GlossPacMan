@@ -7,6 +7,7 @@ import Logic.FrameTime
 import Logic.Ghost
 import Logic.Player
 import Logic.World
+import Logic.Conditions
 import Model
 
 -- The execution order of the gamestate is import for change detection
@@ -15,8 +16,8 @@ update currentFT gstate
   -- check if the game is paused
   -- TODO: Find out if YODA conditions are considered good practice in Haskell.
   | True == pause gstate = gstate
-  | otherwise =
-    updateWorld
+  | otherwise = conditions
+      $ updateWorld
       $ updateGhosts
       $ updatePlayer
       $ updateFrameTime gstate currentFT

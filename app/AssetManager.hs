@@ -1,5 +1,7 @@
 module AssetManager where
 
+import Paths_pacman
+
 
 -- Standard Lib imports
 import System.IO.Unsafe
@@ -36,6 +38,8 @@ gFrightened = pngByFile "frightened.png"
 
 
 
+pngByIOPath::FilePath -> Picture
+pngByIOPath fp = dontDoThis $ loadJuicyJPG $ unsafePerformIO $ getDataFileName fp
 
 jpgByPath::FilePath -> Picture
 jpgByPath p = dontDoThis $ loadJuicyJPG (path ++ p)

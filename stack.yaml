@@ -38,6 +38,7 @@ extra-deps:
   - gloss-juicy-0.2.3
   - ghc-exactprint-0.6.3.2
   - apply-refact-0.8.2.1
+  - data-files-gen-0.0.0.1
 
 # - acme-missiles-0.3
 # - git: https://github.com/commercialhaskell/stack.git
