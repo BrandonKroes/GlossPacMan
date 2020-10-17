@@ -4,7 +4,18 @@ import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
 import Model
 
+
+
+
 -- Updating the player
+
+updateDirection :: Player -> Direction -> Player
+updateDirection (PacMan position score direction) d = PacMan position score d
+
+setPlayerDirection :: Direction -> GameState -> GameState
+setPlayerDirection d game = game {player = updateDirection (player game) d}
+
+
 updatePosition :: GameState -> GameState
 updatePosition gstate = gstate {player = updatePlayerPosition gstate}
 

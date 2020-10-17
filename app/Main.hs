@@ -18,7 +18,7 @@ initialGameState = GameState {
                                Ghost (16, 14) CYAN Chase
                               ],
                     world=getDefaultWorld,
-                    pause=True,
+                    pause=False,
                     dotsLeft=countAmountOfDots getDefaultWorld
                   }
 

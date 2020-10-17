@@ -5,8 +5,7 @@ import Logic.Player
 
 -- Updating the ghost
 updateGhosts :: GameState -> GameState
-updateGhosts gstate = gstate {ghosts = foldr f [] (ghosts gstate)}
-                        where f x r = (updateGhost gstate x) : r
+updateGhosts gstate = gstate {ghosts = map (updateGhost gstate) $ ghosts gstate}
 
 updateGhost :: GameState -> Player -> Player
 updateGhost gstate (Ghost gPos RED mod) = Ghost loc RED mod
@@ -21,8 +20,3 @@ updateGhost gstate (Ghost gPos PINK mod) = Ghost loc PINK mod
           newPlayerPos = position (player (updatePosition (updatePosition gstate) ) )  -- update the player position with two steps
 updateGhost gstate ghost = ghost
 
-updateDirection :: Player -> Direction -> Player
-updateDirection (PacMan position score direction) d = PacMan position score d
-
-setPlayerDirection :: Direction -> GameState -> GameState
-setPlayerDirection d game = game {player = updateDirection (player game) d}

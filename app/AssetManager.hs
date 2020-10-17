@@ -1,5 +1,7 @@
 module AssetManager where
 
+import Paths_pacman
+
 
 -- Standard Lib imports
 import System.IO.Unsafe
@@ -15,8 +17,6 @@ import Graphics.Gloss.Juicy
 -- TODO: Figure out IO procedure
 -- TODO: Making path relative
 -- TODO: https://hackage.haskell.org/package/reactive-banana-threepenny-0.7.1.3/src/src/Paths.hs
-
-path = "D:\\VERA\\HU\\Jaar 4\\Minor\\FP\\Game\\GlossPacMan\\app\\assets\\"
 
 door = pngByFile "door.png"
 wVertical = pngByFile "vertical.png"
@@ -35,15 +35,17 @@ gCyan = pngByFile "cyan.png"
 gOrange = pngByFile "orange.png"
 gFrightened = pngByFile "frightened.png"
 
+getDataFN :: FilePath -> IO FilePath
+getDataFN name = do
+  dir <- getDataDir
+  return (dir ++ "\\app\\assets\\" ++ name)
 
-
-
-jpgByPath::FilePath -> Picture
-jpgByPath p = dontDoThis $ loadJuicyJPG (path ++ p)
+getFilePath::String -> FilePath
+getFilePath s = unsafePerformIO $ getDataFN s
 
 pngByFile::FilePath -> Picture
-pngByFile p = dontDoThis $ loadJuicyPNG (path ++ p)
+pngByFile p = dontDoThis $ loadJuicyPNG $ getFilePath p
 
--- TODO: Find alternative for this anarchy of a function
+-- Justification for this function: If the assets don't load, the game isn't worth much.
 dontDoThis :: IO (Maybe Picture) -> Picture
 dontDoThis = fromJust . unsafePerformIO
