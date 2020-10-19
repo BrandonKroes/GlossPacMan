@@ -25,14 +25,21 @@ update currentFT gstate
 
 inputHandler :: Event -> GameState -> GameState
 inputHandler event gstate
-  | RUNNING /= runningState gstate = gstate
-  | False == (pause gstate) = case event of
-    EventKey (Char 'w') Down _ _ -> setPlayerDirection UP gstate
-    EventKey (Char 's') Down _ _ -> setPlayerDirection DOWN gstate
-    EventKey (Char 'a') Down _ _ -> setPlayerDirection LEFT gstate
-    EventKey (Char 'd') Down _ _ -> setPlayerDirection RIGHT gstate
-    EventKey (Char 'p') Down _ _ -> gstate {pause = not $ pause gstate}
+  | elem (runningState gstate) [START, LOST, WON] = case event of
+    EventKey (SpecialKey _) Down _ _ -> runningGameState
+    EventKey (Char _) Down _ _ -> runningGameState
     _ -> gstate
-  | True == (pause gstate) = case event of
-    EventKey (Char 'p') Down _ _ -> gstate {pause = not $ pause gstate}
-    _ -> gstate
+  | otherwise = runningInputHandler event gstate
+
+runningInputHandler::Event -> GameState -> GameState
+runningInputHandler event gstate
+    | False == (pause gstate) = case event of
+     EventKey (Char 'w') Down _ _ -> setPlayerDirection UP gstate
+     EventKey (Char 's') Down _ _ -> setPlayerDirection DOWN gstate
+     EventKey (Char 'a') Down _ _ -> setPlayerDirection LEFT gstate
+     EventKey (Char 'd') Down _ _ -> setPlayerDirection RIGHT gstate
+     EventKey (Char 'p') Down _ _ -> gstate {pause = not $ pause gstate}
+     _ -> gstate
+   | True == (pause gstate) = case event of
+     EventKey (Char 'p') Down _ _ -> gstate {pause = not $ pause gstate}
+     _ -> gstate

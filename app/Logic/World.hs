@@ -7,11 +7,11 @@ import Model
 updateWorld::GameState->GameState
 updateWorld gstate = detectingTilePlayerInteraction gstate
 
--- Set coin count
+-- Set imgCoin count
 setDotCount :: GameState -> Int -> GameState
 setDotCount gstate dots = gstate {dotsLeft = dots}
 
--- Decrease coin count
+-- Decrease imgCoin count
 decreaseDotCount :: GameState -> GameState
 decreaseDotCount gstate = setDotCount gstate $ (dotsLeft gstate) - 1
 

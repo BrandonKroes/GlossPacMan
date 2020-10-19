@@ -12,18 +12,14 @@ import Data.Maybe
 import Graphics.Gloss
 import Graphics.Gloss.Juicy
 
--- Static function calls for images.
--- I'm not sure when and how they are loaded in (i.e. IO calls)
--- TODO: Figure out IO procedure
--- TODO: Making path relative
--- TODO: https://hackage.haskell.org/package/reactive-banana-threepenny-0.7.1.3/src/src/Paths.hs
 
-door = pngByFile "door.png"
+
+imgDoor = pngByFile "door.png"
 wVertical = pngByFile "vertical.png"
 wHorizontal = pngByFile "horizontal.png"
-empty = pngByFile "empty.png"
-coin = pngByFile "coin.png"
-dot = pngByFile "dot.png"
+imgEmpty = pngByFile "empty.png"
+imgCoin = pngByFile "coin.png"
+imgDot = pngByFile "dot.png"
 pacmanUp = pngByFile "pacmanUp.png"
 pacmanDown = pngByFile "pacmanDown.png"
 pacmanLeft = pngByFile "pacmanLeft.png"

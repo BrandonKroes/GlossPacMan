@@ -54,8 +54,13 @@ executable pacman-exe
       Logic.Ghost
       Logic.World
       Logic.Conditions
+      Render.Player
+      Render.World
+      Render.Override
+      Render.Util
+      
   hs-source-dirs:
-      app app/Logic
+      app app/Logic app/Render
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5

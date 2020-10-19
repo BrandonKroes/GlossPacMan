@@ -5,7 +5,7 @@
 Pac-Man
  - [x] Movement
  - [ ] Collecting dots
- - [ ] Collecting coins
+ - [ ] Collecting imgCoins
  - [ ] Eating ghosts
 
 Ghosts

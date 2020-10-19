@@ -3,16 +3,41 @@ module Model where
 import Data.List
 import Data.Maybe
 
+data GameState = GameState
+  { runningState :: RunningState,
+    player :: Player,
+    world :: World,
+    ghosts :: Ghosts,
+    pause :: Bool,
+    dotsLeft :: Int
+  }
 
-data GameState = GameState {runningState::RunningState,
-                            player :: Player,
-                            world :: World,
-                            ghosts :: Ghosts,
-                            pause :: Bool,
-                            dotsLeft :: Int}
+runningGameState :: GameState
+runningGameState = GameState
+    { runningState = RUNNING,
+      player = PacMan (14, 23) 0 UP,
+      ghosts =
+        [ Ghost (13, 14) RED Chase,
+          Ghost (14, 14) ORANGE Chase,
+          Ghost (15, 14) PINK Chase,
+          Ghost (16, 14) CYAN Chase
+        ],
+      world = getDefaultWorld,
+      pause = False,
+      dotsLeft = countAmountOfDots getDefaultWorld
+    }
 
-
---- RUNNING STATE
+initialGameState :: GameState
+initialGameState = GameState
+      { runningState = START,
+        player = PacMan (14, 23) 0 UP,
+        ghosts =
+          [
+          ],
+        world = [],
+        pause = False,
+        dotsLeft = 0
+      }
 
 data RunningState = START | RUNNING | WON | LOST deriving (Show, Eq)
 
@@ -30,7 +55,7 @@ data Player
       }
   | Ghost
       { position :: (Int, Int),
-        gcolor :: GhostColor,
+        gColor :: GhostColor,
         state :: GhostState
       }
 
