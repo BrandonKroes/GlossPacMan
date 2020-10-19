@@ -8,7 +8,7 @@ conditions::GameState->GameState
 conditions gstate = detectGhostOnPlayer $ allDotsGone gstate
 
 allDotsGone::GameState->GameState
-allDotsGone gstate = gstate {runningState = detectDotsGone gstate $ dotsLeft gstate}
+allDotsGone gstate = gstate {runningState = detectDotsGone gstate $ consumablesLeft gstate}
 
 
 detectDotsGone::GameState->Int-> RunningState
