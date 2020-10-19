@@ -14,6 +14,6 @@ import Model
 
 render :: GameState -> Picture
 render g = pictures $ renderOverride g  $
-                      renderStats g ++
+                      renderStats g  ++
                       renderWorld g ++
                       renderPlayers g

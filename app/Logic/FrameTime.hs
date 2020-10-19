@@ -3,4 +3,4 @@ module Logic.FrameTime where
 import Model
 
 updateFrameTime::GameState -> Float -> GameState
-updateFrameTime gstate f = gstate
+updateFrameTime gstate f = gstate {time = f + (time gstate)}
