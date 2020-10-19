@@ -2,6 +2,8 @@ module Render.Override where
 
 import Model
 import Render.Util
+import Render.Stats
+
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
 
@@ -10,17 +12,19 @@ import Graphics.Gloss.Interface.IO.Game
 -- Render override can decide to throw away all the pics.
 -- Future optimisation would prevent generation of pictures, but currently it will only prevent rendering.
 renderOverride::GameState -> [Picture] -> [Picture]
-renderOverride gstate frames | LOST == (runningState gstate) = getLostText
+renderOverride gstate frames | LOST == (runningState gstate) = getLostText gstate
                              | WON  == (runningState gstate) = getWonText
                              | START == (runningState gstate) = getStartText
                              | otherwise = frames
 
 
-getLostText::[Picture]
-getLostText = [(translatePicture (-100, 0) (color green (text "YOU LOSE"))),
-              (translatePicture (-100, 350) (color red (text "PRESS ANY"))),
-              (translatePicture (-100, 470) (color red (text " KEY TO"))),
-              (translatePicture (-100, 590) (color red (text "TRY AGAIN")))]
+getLostText::GameState->[Picture]
+getLostText gstate = [(translatePicture(-100, 0  ) (color green (text "YOU LOSE"))),
+              (translatePicture (200, 100) (getScoreText)),
+              (translatePicture (300, 100) (getScore gstate)),
+              (translatePicture (-100, 350) (color red   (text "PRESS ANY"))),
+              (translatePicture (-100, 470) (color red   (text " KEY TO"))),
+              (translatePicture (-100, 590) (color red   (text "TRY AGAIN")))]
 
 getWonText::[Picture]
 getWonText = [(translatePicture (-100, 0) (color green (text "YOU WIN"))),
