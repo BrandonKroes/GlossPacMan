@@ -25,13 +25,16 @@ updateGhostByChase (Ghost gPos ORANGE gState) gstate = getOrangeGhost (Ghost gPo
 updateGhostByChase (Ghost gPos CYAN gState) gstate = getCyanGhost (Ghost gPos CYAN gState) gstate
 updateGhostByChase ghost gstate = ghost
 
-
+updateGposAstar :: GameState -> (Int, Int) -> (Int, Int) -> (Int, Int)
+updateGposAstar gstate start end = case findPath gstate start end of
+                                    Just (steps, (x : xs)) -> x
+                                    _ -> start
 
 getOrangeGhost::Player -> GameState -> Player
-getOrangeGhost og@(Ghost (gx, gy) gColor gState) gstate = if distance > 8 then getRedGhost og gstate else (Ghost (gx, gy) gColor Scatter)
+getOrangeGhost og@(Ghost (gx, gy) gColor gState) gstate = if distance > 8 then getRedGhost og gstate else (Ghost (gx, gy) gColor Scatter) -- follow reds tackic
   where 
     (px, py) = (position (player gstate))
-    distance = sqrt (fromIntegral ((px - gx)^2 + (py - gy)^2 ))
+    distance = sqrt (fromIntegral ((px - gx)^2 + (py - gy)^2 )) -- first convert to integral, then sqrt operation
     
 
 getCyanGhost::Player -> GameState -> Player
@@ -40,21 +43,15 @@ getCyanGhost (Ghost gPos gColor gState) gstate = Ghost loc gColor gState
     (px, py) = position (player (updatePosition (updatePosition gstate) ) ) -- update the player position with two steps
     ((Ghost (rx,ry) _ _ ): gs) = ghosts gstate
     destination = ( 2 * px - rx, 2 * py - ry )
-    loc = case findPath gstate gPos destination of
-      Just (steps, (x : xs)) -> x
-      _ -> gPos
+    loc = updateGposAstar gstate gPos destination
 
 getRedGhost :: Player -> GameState -> Player
 getRedGhost (Ghost gPos gColor gState) gstate = Ghost loc gColor gState
   where
-    loc = case findPath gstate gPos (position (player gstate)) of
-      Just (steps, (x : xs)) -> x
-      _ -> gPos
+    loc = updateGposAstar  gstate gPos (position (player gstate))
 
 getPinkGhost :: Player -> GameState -> Player
 getPinkGhost (Ghost gPos gColor gState) gstate = Ghost loc gColor gState
   where
     newPlayerPos = position (player (updatePosition (updatePosition (updatePosition (updatePosition gstate) ) ) ))  -- update the player position with four steps
-    loc = case findPath gstate gPos newPlayerPos of
-      Just (steps, (x : xs)) -> x
-      _ -> gPos
+    loc = updateGposAstar gstate gPos newPlayerPos
