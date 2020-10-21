@@ -17,7 +17,16 @@ renderStats gstate = [(translate (290) (475) (getConsumablesLeft gstate)),
                       ]
 
 getTimeSeconds::Float->String
-getTimeSeconds secs = show $ ((round secs) `mod` 60::Int)
+getTimeSeconds sec | len > 1 = secs | otherwise = secsappend
+      where
+        secs = getSec sec
+        len = length secs
+        secsappend = "0" ++ secs
+
+
+getSec::Float -> String
+getSec sec = show $ ((round sec) `mod` 60::Int)
+
 
 getTimeMinutes::Float->String
 getTimeMinutes minutes = show $ ((round minutes) `quot` 60::Int)

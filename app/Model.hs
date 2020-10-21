@@ -1,8 +1,7 @@
 {-# LANGUAGE OverloadedStrings, DeriveGeneric, DeriveAnyClass, StandaloneDeriving #-}
 module Model where
 
-
-
+import Constants
 import Data.List
 import Data.Maybe
 import Data.Aeson (ToJSON)
@@ -121,11 +120,12 @@ isTile::(Int, Int) -> Tile -> Bool
 isTile checkPos (Walkable field position) | checkPos == position = True | otherwise = False
 isTile checkPos (NotWalkable _ position) | checkPos == position = True | otherwise = False
 
-setGhostsToFrightened::[Player]->[Player]
-setGhostsToFrightened ghosts = map (setGhostState Frightened) ghosts
 
-setGhostState::GhostState->Player->Player
-setGhostState nState = \g -> g {state=nState}
+setGhostsToState::GhostState->[Player]->Float->[Player]
+setGhostsToState ghostState ghosts time = map (setGhostToState ghostState time) ghosts
+
+setGhostToState::GhostState->Float->Player->Player
+setGhostToState nState time = \g -> g {state=nState, timestamp=time}
 
 
 data Direction =  UP   | DOWN  | LEFT       | RIGHT deriving (Show, Eq)

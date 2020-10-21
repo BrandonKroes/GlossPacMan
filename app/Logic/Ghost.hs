@@ -4,6 +4,7 @@ module Logic.Ghost where
 
 import Logic.PathFinding
 import Logic.Player
+import Constants
 import Model
 
 -- Updating the ghost
@@ -11,10 +12,18 @@ updateGhosts :: GameState -> GameState
 updateGhosts gstate = gstate {ghosts = map (updateGhost gstate) $ ghosts gstate}
 
 updateGhost :: GameState -> Player -> Player
-updateGhost gstate (Ghost gPos gColor Frightened timestamp sequenc) = Ghost gPos gColor Frightened timestamp sequenc
-updateGhost gstate (Ghost gPos gColor Scatter timestamp sequenc)  = Ghost gPos gColor Scatter timestamp sequenc
-updateGhost gstate (Ghost gPos gColor Chase timestamp sequenc) = updateGhostByChase (Ghost gPos gColor Chase timestamp sequenc) gstate
+updateGhost gstate (Ghost gPos gColor Frightened timestamp sequenc) = updateGhostByFrightened (Ghost gPos gColor Frightened timestamp sequenc) gstate
+updateGhost gstate (Ghost gPos gColor Scatter timestamp sequenc)    = Ghost gPos gColor Scatter timestamp sequenc
+updateGhost gstate (Ghost gPos gColor Chase timestamp sequenc)      = updateGhostByChase (Ghost gPos gColor Chase timestamp sequenc) gstate
 updateGhost gstate ghost = ghost
+
+
+
+updateGhostByFrightened::Player->GameState->Player
+updateGhostByFrightened (Ghost gPos gColor Frightened timestamp sequenc) gstate | (time gstate) >= (timestamp) = setGhostToState Chase (time gstate) (Ghost gPos gColor Frightened timestamp sequenc)
+updateGhostByFrightened ghost gstate  = ghost
+
+
 
 
 -- Nested guarding isn't a thing in haskell, so abstracting it.

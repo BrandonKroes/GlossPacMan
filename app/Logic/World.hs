@@ -1,6 +1,7 @@
 module Logic.World where
 import Model
 
+import Constants
 
 
 
@@ -9,9 +10,9 @@ updateWorld gstate = detectingTilePlayerInteraction $ detectPlayerOnCoin gstate
 
 
 -- Detecting if a player picket up a coin
-
 detectPlayerOnCoin::GameState->GameState
 detectPlayerOnCoin gstate = gstate {ghosts = getGhostFrightened gstate}
+
 
 
 getGhostFrightened::GameState->Ghosts
@@ -22,7 +23,7 @@ getGhostFrightened gstate  | RUNNING /= (runningState gstate) = g
                              g = ghosts gstate
                              playerPos = position $ player gstate
                              playerTile = getTileByPosition gstate playerPos
-                             freightGhosts = setGhostsToFrightened g
+                             freightGhosts = setGhostsToState Frightened g $ (frightTime + time gstate)
 
 
 -- Set imgCoin count
