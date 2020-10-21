@@ -24,10 +24,10 @@ runningGameState = GameState
     { runningState = RUNNING,
       player = PacMan (14, 23) 0 UP,
       ghosts =
-        [ Ghost (13, 14) RED Chase,
-          Ghost (14, 14) ORANGE Chase,
-          Ghost (15, 14) PINK Chase,
-          Ghost (16, 14) CYAN Chase
+        [ Ghost (13, 14) RED Idle,
+          Ghost (14, 14) ORANGE Idle,
+          Ghost (15, 14) PINK Idle,
+          Ghost (16, 14) CYAN Idle
         ],
       world = getDefaultWorld,
       pause = False,
@@ -102,8 +102,6 @@ isConsumable::Tile->Bool
 isConsumable (Walkable field _) | field==Empty=False |field==DOOR=False | otherwise=True
 isConsumable _ = False
 
-
-
 data Field = Coin | Bonus | Empty | Dot | DOOR deriving (Show, Eq)
 
 type World = [Tile]
@@ -122,12 +120,8 @@ isTile::(Int, Int) -> Tile -> Bool
 isTile checkPos (Walkable field position) | checkPos == position = True | otherwise = False
 isTile checkPos (NotWalkable _ position) | checkPos == position = True | otherwise = False
 
--- TODO: Make dynamic
---getTilePosition::(Int, Int) -> Int
---getTilePosition (x,y) = (((x) * 28) + y)
-
-data Direction = UP | DOWN | LEFT | RIGHT deriving (Show, Eq)
-data GhostState = Chase | Frightened | Scatter deriving (Show, Eq)
+data Direction =  UP   | DOWN  | LEFT       | RIGHT deriving (Show, Eq)
+data GhostState = Idle | Chase | Frightened | Scatter deriving (Show, Eq)
 
 -- TODO currently angled walls arent used
 data WallType = VERTICAL | LANGLE | RANGLE | HORIZONTAL deriving (Show, Eq)

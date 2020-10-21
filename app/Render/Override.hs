@@ -8,7 +8,6 @@ import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
 
 
-
 -- Render override can decide to throw away all the pics.
 -- Future optimisation would prevent generation of pictures, but currently it will only prevent rendering.
 renderOverride::GameState -> [Picture] -> [Picture]
@@ -16,7 +15,6 @@ renderOverride gstate frames | LOST == (runningState gstate) = getLostText gstat
                              | WON  == (runningState gstate) = getWonText
                              | START == (runningState gstate) = getStartText
                              | otherwise = frames
-
 
 getLostText::GameState->[Picture]
 getLostText gstate = [(translatePicture(-100, 0  ) (color green (text "YOU LOSE"))),
