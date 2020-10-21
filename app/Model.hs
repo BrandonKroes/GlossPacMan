@@ -135,9 +135,16 @@ isLethal (Ghost gPos gColor state timestamp sequenc) = elem state getLethalGhost
 isStateGhost::GhostState->Player->Bool
 isStateGhost state (Ghost gPos gColor gState timestamp sequenc) = gState == state
 
+isNotStateGhost::GhostState->Player->Bool
+isNotStateGhost state (Ghost gPos gColor gState timestamp sequenc) = not (gState == state)
+
 
 samePosition::(Int, Int) -> Player -> Bool
 samePosition pos = \x -> (position x) == pos
+
+notSamePosition::(Int, Int) -> Player -> Bool
+notSamePosition pos = \x -> (position x) /= pos
+
 
 
 

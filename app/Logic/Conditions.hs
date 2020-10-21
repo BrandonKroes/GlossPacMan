@@ -31,9 +31,10 @@ playerEatingFrightenedGhost gstate | null frightenedGhosts = gstate
     playerPosition = getPlayerPosition $ player gstate
     g = ghosts gstate
     frightenedGhosts = filter (samePosition playerPosition) $ filter (isStateGhost Frightened) g
+    notFrightenedGhosts = filter (notSamePosition playerPosition) g
     newState = Retreat
     t = time gstate
-    newGhosts = setGhostsToState newState frightenedGhosts t
+    newGhosts = notFrightenedGhosts ++ (setGhostsToState newState frightenedGhosts t)
 
 
 
