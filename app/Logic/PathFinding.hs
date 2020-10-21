@@ -7,10 +7,7 @@ import Model
 taxicabNeighbors :: (Int, Int) -> [(Int, Int)]
 taxicabNeighbors (x, y) = [(x, y + 1), (x - 1, y), (x + 1, y), (x, y - 1)]
 
-isWall :: (Int, Int) -> Bool
-isWall (x, y) = x == 1 && (-2) <= y && y <= 1
-
-isWall_2 gstate (x,y) = case getTileByPosition gstate (x,y) of
+isWall gstate (x,y) = case getTileByPosition gstate (x,y) of
                           NotWalkable _ _ -> True
                           _               -> False
 
@@ -22,4 +19,4 @@ findPath gstate start end =
   let next = taxicabNeighbors
       cost = taxicabDistance
       remaining = (taxicabDistance end)
-  in aStar (next `pruning` (isWall_2 gstate)) cost remaining (== end) start
+  in aStar (next `pruning` (isWall gstate)) cost remaining (== end) start
