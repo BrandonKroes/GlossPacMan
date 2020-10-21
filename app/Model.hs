@@ -1,7 +1,12 @@
+{-# LANGUAGE OverloadedStrings, DeriveGeneric, DeriveAnyClass, StandaloneDeriving #-}
 module Model where
+
+
 
 import Data.List
 import Data.Maybe
+import Data.Aeson (ToJSON)
+import GHC.Generics
 
 data GameState = GameState
   { runningState :: RunningState,

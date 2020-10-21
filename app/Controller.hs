@@ -43,3 +43,6 @@ runningInputHandler event gstate
    | True == (pause gstate) = case event of
      EventKey (Char 'p') Down _ _ -> gstate {pause = not $ pause gstate}
      _ -> gstate
+
+
+-- The quit buttons stores the current game state

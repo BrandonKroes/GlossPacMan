@@ -2,6 +2,11 @@ module AssetManager where
 
 import Paths_pacman
 
+{-# LANGUAGE OverloadedStrings, DeriveGeneric, DeriveAnyClass #-}
+
+import GHC.Generics
+import Data.Aeson.Text (encodeToLazyText)
+import Data.Aeson (ToJSON)
 
 -- Standard Lib imports
 import System.IO.Unsafe
@@ -12,6 +17,9 @@ import Data.Maybe
 import Graphics.Gloss
 import Graphics.Gloss.Juicy
 
+
+-- Handmade imports
+import Model
 
 
 imgDoor = pngByFile "door.png"
