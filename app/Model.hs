@@ -9,14 +9,14 @@ import Data.Aeson (ToJSON)
 import GHC.Generics
 
 data GameState = GameState
-  { runningState :: RunningState,
-    player :: Player,
-    world :: World,
-    ghosts :: Ghosts,
-    pause :: Bool,
-    consumablesLeft :: Int,
-    consumablesTotal::Int,
-    time::Float
+  { runningState     :: RunningState,
+    player           :: Player,
+    world            :: World,
+    ghosts           :: Ghosts,
+    pause            :: Bool,
+    consumablesLeft  :: Int,
+    consumablesTotal :: Int,
+    time             :: Float
   }
 
 runningGameState :: GameState
@@ -24,10 +24,10 @@ runningGameState = GameState
     { runningState = RUNNING,
       player = PacMan (14, 23) 0 UP,
       ghosts =
-        [ Ghost (13, 14) RED Idle,
-          Ghost (14, 14) ORANGE Idle,
-          Ghost (15, 14) PINK Idle,
-          Ghost (16, 14) CYAN Idle
+        [ Ghost (13, 14) RED    Idle 0.0 0,
+          Ghost (14, 14) ORANGE Idle 0.0 0,
+          Ghost (15, 14) PINK   Idle 0.0 0,
+          Ghost (16, 14) CYAN   Idle 0.0 0
         ],
       world = getDefaultWorld,
       pause = False,
@@ -55,14 +55,16 @@ data RunningState = START | RUNNING | WON | LOST deriving (Show, Eq)
 
 data Player
   = PacMan
-      { position :: (Int, Int),
-        score :: Int,
+      { position  :: (Int, Int),
+        score     :: Int,
         direction :: Direction
       }
   | Ghost
-      { position :: (Int, Int),
-        gColor :: GhostColor,
-        state :: GhostState
+      { position  :: (Int, Int),
+        gColor    :: GhostColor,
+        state     :: GhostState,
+        timestamp :: Float,
+        sequence  :: Int
       }
 
 type Ghosts = [Player]
