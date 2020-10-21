@@ -70,8 +70,6 @@ type Ghosts = [Player]
 
 data GhostColor = RED | ORANGE | PINK | CYAN deriving (Show, Eq)
 
-
-
 getGhostsPosition::Ghosts->[(Int, Int)]
 getGhostsPosition ghosts = map getPlayerPosition ghosts
 
@@ -126,6 +124,38 @@ setGhostsToState ghostState ghosts time = map (setGhostToState ghostState time) 
 
 setGhostToState::GhostState->Float->Player->Player
 setGhostToState nState time = \g -> g {state=nState, timestamp=time}
+
+
+isNonLethal::Player->Bool
+isNonLethal (Ghost gPos gColor state timestamp sequenc) = elem state getNonLethalGhostStates
+
+isLethal::Player->Bool
+isLethal (Ghost gPos gColor state timestamp sequenc) = elem state getLethalGhostStates
+
+isStateGhost::GhostState->Player->Bool
+isStateGhost state (Ghost gPos gColor gState timestamp sequenc) = gState == state
+
+
+samePosition::(Int, Int) -> Player -> Bool
+samePosition pos = \x -> (position x) == pos
+
+
+
+frightenedGhostsOnPlayer::[Player] -> [Player]
+frightenedGhostsOnPlayer players = filter (isStateGhost Frightened) players
+
+getNonLethalGhostStates::[GhostState]
+getNonLethalGhostStates = [Retreat, Frightened]
+
+getLethalGhostStates::[GhostState]
+getLethalGhostStates = [Idle, Chase, Scatter]
+
+getNonLethalGhosts::[Player] -> [Player]
+getNonLethalGhosts ghosts = filter (isNonLethal) ghosts
+
+getDeadlyGhostsPosition::Ghosts -> [(Int, Int)]
+getDeadlyGhostsPosition players = getGhostsPosition $ filter (isLethal) players
+
 
 
 data Direction =  UP   | DOWN  | LEFT       | RIGHT deriving (Show, Eq)

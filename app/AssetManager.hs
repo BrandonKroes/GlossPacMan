@@ -38,6 +38,7 @@ gPink = pngByFile "pink.png"
 gCyan = pngByFile "cyan.png"
 gOrange = pngByFile "orange.png"
 gFrightened = pngByFile "frightened.png"
+gRetreat = pngByFile "retreat.png"
 
 getDataFN :: FilePath -> IO FilePath
 getDataFN name = do

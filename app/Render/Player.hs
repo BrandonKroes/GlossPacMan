@@ -22,7 +22,8 @@ getPacManTexture direction | direction == UP = pacmanUp
 
 getGhostTexture :: GhostColor -> GhostState -> Picture
 getGhostTexture gColor state
-  | state == Frightened = gFrightened
+  | state  == Frightened = gFrightened
+  | state  == Retreat = gRetreat
   | gColor == RED = gRed
   | gColor == PINK = gPink
   | gColor == CYAN = gCyan

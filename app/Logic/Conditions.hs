@@ -5,7 +5,7 @@ import Model
 
 
 conditions::GameState->GameState
-conditions gstate = detectGhostOnPlayer $  allDotsGone gstate
+conditions gstate = playerEatingFrightenedGhost $ detectGhostOnPlayer $  allDotsGone gstate
 
 allDotsGone::GameState->GameState
 allDotsGone gstate = gstate {runningState = detectDotsGone gstate $ consumablesLeft gstate}
@@ -20,13 +20,25 @@ detectDotsGone gstate dots | RUNNING /= (runningState gstate) = (runningState gs
 runningStateGhostOnPlayer::GameState->Ghosts->(Int, Int) -> RunningState
 runningStateGhostOnPlayer gstate g pp
                     | RUNNING /= (runningState gstate) = (runningState gstate)
-                    | areGhostsOnPlayer g pp == False = LOST
+                    | areDeadlyGhostsOnPlayer g pp == False = LOST
                     | otherwise = RUNNING
 
 
+playerEatingFrightenedGhost::GameState->GameState
+playerEatingFrightenedGhost gstate | null frightenedGhosts = gstate
+                                   | otherwise = gstate {ghosts=newGhosts}
+  where
+    playerPosition = getPlayerPosition $ player gstate
+    g = ghosts gstate
+    frightenedGhosts = filter (samePosition playerPosition) $ filter (isStateGhost Frightened) g
+    newState = Retreat
+    t = time gstate
+    newGhosts = setGhostsToState newState frightenedGhosts t
 
-areGhostsOnPlayer::Ghosts-> (Int, Int)-> Bool
-areGhostsOnPlayer ghosts pp = null $ filter (\x ->  x == pp) $ getGhostsPosition ghosts
+
+
+areDeadlyGhostsOnPlayer::Ghosts-> (Int, Int)-> Bool
+areDeadlyGhostsOnPlayer ghosts pp = null $ filter (\x ->  x == pp) $ getDeadlyGhostsPosition ghosts
 
 detectGhostOnPlayer::GameState->GameState
 detectGhostOnPlayer gstate = gstate {runningState = runningStateGhostOnPlayer gstate (ghosts gstate) (getPlayerPosition $ player gstate)}
