@@ -24,10 +24,10 @@ runningGameState = GameState
     { runningState = RUNNING,
       player = PacMan (14, 23) 0 UP,
       ghosts =
-        [ Ghost (13, 14) RED Idle,
-          Ghost (14, 14) ORANGE Idle,
-          Ghost (15, 14) PINK Idle,
-          Ghost (16, 14) CYAN Idle
+        [ Ghost (13, 14) RED ToScatterPlace,
+          Ghost (14, 14) ORANGE ToScatterPlace,
+          Ghost (15, 14) PINK ToScatterPlace,
+          Ghost (16, 14) CYAN ToScatterPlace
         ],
       world = getDefaultWorld,
       pause = False,
@@ -116,7 +116,7 @@ isTile checkPos (Walkable field position) | checkPos == position = True | otherw
 isTile checkPos (NotWalkable _ position) | checkPos == position = True | otherwise = False
 
 data Direction =  UP   | DOWN  | LEFT       | RIGHT deriving (Show, Eq)
-data GhostState = Idle | Chase | Retreat    | Frightened | Scatter deriving (Show, Eq)
+data GhostState = Idle | Chase | Retreat    | Frightened | Scatter [Direction] | ToScatterPlace deriving (Show, Eq)
 
 -- TODO currently angled walls arent used
 data WallType = VERTICAL | LANGLE | RANGLE | HORIZONTAL deriving (Show, Eq)

@@ -28,14 +28,14 @@ getNewPlayerPosition gstate
   | walkable == False = oPosition
   where
     oPosition = position $ player gstate
-    nPosition = calculateNextPlayerPosition $ player gstate
+    nPosition = calculateNextPosition (position (player gstate)) (direction (player gstate) )
     walkable = positionWalkable nPosition gstate
 
 modifyPlayerPosition :: (Int, Int) -> Player -> Player
 modifyPlayerPosition (x, y) (PacMan position score direction) = PacMan (x, y) score direction
 
-calculateNextPlayerPosition :: Player -> (Int, Int)
-calculateNextPlayerPosition (PacMan (x, y) score direction)
+calculateNextPosition :: (Int, Int) -> Direction -> (Int, Int)
+calculateNextPosition (x, y)  direction
   | direction == UP     = (x   , y -1)
   | direction == DOWN   = (x   , y +1)
   | direction == LEFT   = (x -1, y   )
