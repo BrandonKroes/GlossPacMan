@@ -53,11 +53,6 @@ initialGameState = GameState
 data RunningState = START | RUNNING | WON | LOST deriving (Show, Eq)
 
 
-
-
-
-data Pixel = Int Int
-
 data Player
   = PacMan
       { position :: (Int, Int),
@@ -121,7 +116,7 @@ isTile checkPos (Walkable field position) | checkPos == position = True | otherw
 isTile checkPos (NotWalkable _ position) | checkPos == position = True | otherwise = False
 
 data Direction =  UP   | DOWN  | LEFT       | RIGHT deriving (Show, Eq)
-data GhostState = Idle | Chase | Frightened | Scatter deriving (Show, Eq)
+data GhostState = Idle | Chase | Retreat    | Frightened | Scatter deriving (Show, Eq)
 
 -- TODO currently angled walls arent used
 data WallType = VERTICAL | LANGLE | RANGLE | HORIZONTAL deriving (Show, Eq)
