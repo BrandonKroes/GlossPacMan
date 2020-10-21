@@ -99,6 +99,10 @@ isConsumable::Tile->Bool
 isConsumable (Walkable field _) | field==Empty=False |field==DOOR=False | otherwise=True
 isConsumable _ = False
 
+isCoin::Tile->Bool
+isCoin (Walkable field _) | field==Coin=True | otherwise=False
+isCoin _ = False
+
 data Field = Coin | Bonus | Empty | Dot | DOOR deriving (Show, Eq)
 
 type World = [Tile]
@@ -116,6 +120,13 @@ getTileIndexByPosition gstate index = fromJust . findIndex(isTile index) $ world
 isTile::(Int, Int) -> Tile -> Bool
 isTile checkPos (Walkable field position) | checkPos == position = True | otherwise = False
 isTile checkPos (NotWalkable _ position) | checkPos == position = True | otherwise = False
+
+setGhostsToFrightened::[Player]->[Player]
+setGhostsToFrightened ghosts = map (setGhostState Frightened) ghosts
+
+setGhostState::GhostState->Player->Player
+setGhostState nState = \g -> g {state=nState}
+
 
 data Direction =  UP   | DOWN  | LEFT       | RIGHT deriving (Show, Eq)
 data GhostState = Idle | Chase | Retreat    | Frightened | Scatter deriving (Show, Eq)

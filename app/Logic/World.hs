@@ -5,7 +5,25 @@ import Model
 
 
 updateWorld::GameState->GameState
-updateWorld gstate = detectingTilePlayerInteraction gstate
+updateWorld gstate = detectingTilePlayerInteraction $ detectPlayerOnCoin gstate
+
+
+-- Detecting if a player picket up a coin
+
+detectPlayerOnCoin::GameState->GameState
+detectPlayerOnCoin gstate = gstate {ghosts = getGhostFrightened gstate}
+
+
+getGhostFrightened::GameState->Ghosts
+getGhostFrightened gstate  | RUNNING /= (runningState gstate) = g
+                           | isCoin playerTile == True = freightGhosts
+                           | otherwise = g
+                           where
+                             g = ghosts gstate
+                             playerPos = position $ player gstate
+                             playerTile = getTileByPosition gstate playerPos
+                             freightGhosts = setGhostsToFrightened g
+
 
 -- Set imgCoin count
 setConsumablesLeft :: GameState -> Int -> GameState
