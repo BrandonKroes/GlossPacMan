@@ -52,17 +52,17 @@ getNewDirPos ghost@(Ghost gPos gColor (Scatter route)) gstate = case route of
 
 
 getOrangeGhost::Player -> GameState -> Player
-getOrangeGhost og@(Ghost (gx, gy) gColor gState@Chase) gstate = if distance > 8 then getRedGhost og gstate else (Ghost (gx, gy) gColor ToScatterPlace) -- follow reds tackic
+getOrangeGhost ghost@(Ghost (gx, gy) gColor gState@Chase) gstate = if distance > 8 then getRedGhost ghost gstate else (Ghost (gx, gy) gColor ToScatterPlace) -- follow reds tackic
   where 
     (px, py) = (position (player gstate))
     distance = sqrt (fromIntegral ((px - gx)^2 + (py - gy)^2 )) -- first convert to integral, then sqrt operation
 
-getOrangeGhost og@(Ghost gPos gColor gState@ToScatterPlace) gstate = Ghost pos gColor state
+getOrangeGhost (Ghost gPos gColor gState@ToScatterPlace) gstate = Ghost pos gColor state
   where 
     (pos, state) = nextPosScatter gstate gPos (2,29)
 
-getOrangeGhost og@(Ghost gPos gColor gState@(Scatter ds)) gstate = Ghost pos gColor (Scatter route)
-  where (pos, route) = getNewDirPos og gstate
+getOrangeGhost ghost@(Ghost gPos gColor gState@(Scatter ds)) gstate = Ghost pos gColor (Scatter route)
+  where (pos, route) = getNewDirPos ghost gstate
 
 getOrangeGhost g _ = g
 
@@ -74,12 +74,12 @@ getCyanGhost (Ghost gPos gColor gState@Chase) gstate = Ghost loc gColor gState
     destination = ( 2 * px - rx, 2 * py - ry )
     loc = updateGposAstar gstate gPos destination
 
-getCyanGhost og@(Ghost gPos gColor gState@ToScatterPlace) gstate = Ghost pos gColor state
+getCyanGhost (Ghost gPos gColor gState@ToScatterPlace) gstate = Ghost pos gColor state
   where 
     (pos, state) = nextPosScatter gstate gPos (27,29)
 
-getCyanGhost og@(Ghost gPos gColor gState@(Scatter ds)) gstate = Ghost pos gColor (Scatter route)
-  where (pos, route) = getNewDirPos og gstate
+getCyanGhost ghost@(Ghost gPos gColor gState@(Scatter ds)) gstate = Ghost pos gColor (Scatter route)
+  where (pos, route) = getNewDirPos ghost gstate
 
 getCyanGhost g _ = g
 
@@ -88,12 +88,12 @@ getRedGhost (Ghost gPos gColor gState@Chase) gstate = Ghost loc gColor gState
   where
     loc = updateGposAstar  gstate gPos (position (player gstate))
 
-getRedGhost og@(Ghost gPos gColor gState@ToScatterPlace) gstate = Ghost pos gColor state
+getRedGhost (Ghost gPos gColor gState@ToScatterPlace) gstate = Ghost pos gColor state
   where 
     (pos, state) = nextPosScatter gstate gPos (27,2)
 
-getRedGhost og@(Ghost gPos gColor gState@(Scatter ds)) gstate = Ghost pos gColor (Scatter route)
-  where (pos, route) = getNewDirPos og gstate
+getRedGhost ghost@(Ghost gPos gColor gState@(Scatter ds)) gstate = Ghost pos gColor (Scatter route)
+  where (pos, route) = getNewDirPos ghost gstate
 
 getRedGhost g _ = g
 
@@ -103,11 +103,11 @@ getPinkGhost (Ghost gPos gColor gState@Chase) gstate = Ghost loc gColor gState
     newPlayerPos = position (player (updatePosition (updatePosition (updatePosition (updatePosition gstate) ) ) ))  -- update the player position with four steps
     loc = updateGposAstar gstate gPos newPlayerPos
 
-getPinkGhost og@(Ghost gPos gColor gState@ToScatterPlace) gstate = Ghost pos gColor state
+getPinkGhost (Ghost gPos gColor gState@ToScatterPlace) gstate = Ghost pos gColor state
   where 
     (pos, state) = nextPosScatter gstate gPos (2,2)
 
-getPinkGhost og@(Ghost gPos gColor gState@(Scatter ds)) gstate = Ghost pos gColor (Scatter route)
-  where (pos, route) = getNewDirPos og gstate
+getPinkGhost ghost@(Ghost gPos gColor gState@(Scatter ds)) gstate = Ghost pos gColor (Scatter route)
+  where (pos, route) = getNewDirPos ghost gstate
 
 getPinkGhost g _ = g
