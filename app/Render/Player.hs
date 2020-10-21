@@ -29,7 +29,7 @@ getGhostTexture gColor state
   | gColor == ORANGE = gOrange
 
 renderPlayerType :: Player -> Picture
-renderPlayerType (PacMan position score direction) = translatePlayerByPosition position $ getPacManTexture direction
+renderPlayerType (PacMan position score (direction,_)) = translatePlayerByPosition position $ getPacManTexture direction
 renderPlayerType (Ghost position gColor state) = translatePlayerByPosition position $ getGhostTexture gColor state
 
 renderGhosts :: GameState -> [Picture]

@@ -22,12 +22,12 @@ data GameState = GameState
 runningGameState :: GameState
 runningGameState = GameState
     { runningState = RUNNING,
-      player = PacMan (14, 23) 0 UP,
+      player = PacMan (14, 23) 0 (UP, NOTHING) ,
       ghosts =
-        [ Ghost (13, 14) RED ToScatterPlace,
-          Ghost (14, 14) ORANGE ToScatterPlace,
-          Ghost (15, 14) PINK ToScatterPlace,
-          Ghost (16, 14) CYAN ToScatterPlace
+        [ Ghost (13, 14) RED Idle,
+          Ghost (14, 14) ORANGE Idle,
+          Ghost (15, 14) PINK Idle,
+          Ghost (16, 14) CYAN Idle
         ],
       world = getDefaultWorld,
       pause = False,
@@ -39,7 +39,7 @@ runningGameState = GameState
 initialGameState :: GameState
 initialGameState = GameState
       { runningState = START,
-        player = PacMan (14, 23) 0 UP,
+        player = PacMan (14, 23) 0 (UP, NOTHING),
         ghosts =
           [
           ],
@@ -57,7 +57,7 @@ data Player
   = PacMan
       { position :: (Int, Int),
         score :: Int,
-        direction :: Direction
+        direction :: (Direction, Direction)
       }
   | Ghost
       { position :: (Int, Int),
@@ -115,7 +115,7 @@ isTile::(Int, Int) -> Tile -> Bool
 isTile checkPos (Walkable field position) | checkPos == position = True | otherwise = False
 isTile checkPos (NotWalkable _ position) | checkPos == position = True | otherwise = False
 
-data Direction =  UP   | DOWN  | LEFT       | RIGHT deriving (Show, Eq)
+data Direction =  UP   | DOWN  | LEFT       | RIGHT      | NOTHING deriving (Show, Eq)
 data GhostState = Idle | Chase | Retreat    | Frightened | Scatter [Direction] | ToScatterPlace deriving (Show, Eq)
 
 -- TODO currently angled walls arent used
