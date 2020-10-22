@@ -15,7 +15,9 @@ data GameState = GameState
     pause            :: Bool,
     consumablesLeft  :: Int,
     consumablesTotal :: Int,
-    time             :: Float
+    time             :: Float,
+    animationTime    :: Float,
+    animationInterval:: Int
   }
 
 runningGameState :: GameState
@@ -32,7 +34,9 @@ runningGameState = GameState
       pause = False,
       consumablesTotal = countAmountOfDots getDefaultWorld,
       consumablesLeft = countAmountOfDots getDefaultWorld,
-      time=0.0
+      time=0.0,
+      animationTime = 0,
+      animationInterval=1
     }
 
 initialGameState :: GameState
@@ -46,7 +50,9 @@ initialGameState = GameState
         pause = False,
         consumablesTotal = 0,
         consumablesLeft =  0,
-        time=0.0
+        time=0.0,
+        animationTime = 0,
+        animationInterval=1
       }
 
 data RunningState = START | RUNNING | WON | LOST deriving (Show, Eq)

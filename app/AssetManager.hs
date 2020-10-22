@@ -28,6 +28,12 @@ wHorizontal = pngByFile "horizontal.png"
 imgEmpty = pngByFile "empty.png"
 imgCoin = pngByFile "coin.png"
 imgDot = pngByFile "dot.png"
+
+pacmanUp2 = pngByFile "pacmanUp2.png"
+pacmanDown2 = pngByFile "pacmanDown2.png"
+pacmanLeft2 = pngByFile "pacmanLeft2.png"
+pacmanRight2 = pngByFile "pacmanRight2.png"
+
 pacmanUp = pngByFile "pacmanUp.png"
 pacmanDown = pngByFile "pacmanDown.png"
 pacmanLeft = pngByFile "pacmanLeft.png"
@@ -39,6 +45,17 @@ gCyan = pngByFile "cyan.png"
 gOrange = pngByFile "orange.png"
 gFrightened = pngByFile "frightened.png"
 gRetreat = pngByFile "retreat.png"
+
+
+gRed2 = pngByFile "red.png"
+gPink2 = pngByFile "pink.png"
+gCyan2 = pngByFile "cyan.png"
+gOrange2 = pngByFile "orange.png"
+gFrightened2 = pngByFile "frightened.png"
+gRetreat2 = pngByFile "retreat.png"
+
+
+
 
 getDataFN :: FilePath -> IO FilePath
 getDataFN name = do
