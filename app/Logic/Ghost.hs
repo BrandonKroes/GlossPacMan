@@ -11,7 +11,6 @@ import Model
 -- Updating the ghost
 updateGhosts :: GameState -> GameState
 updateGhosts gstate = gstate {ghosts = map (updateGhost gstate) $ ghosts gstate}
-
 updateGhost :: GameState -> Player -> Player
 updateGhost gstate (Ghost gPos gColor Frightened timestamp sequenc) = updateGhostByFrightened (Ghost gPos gColor Frightened timestamp sequenc) gstate
 updateGhost gstate (Ghost gPos gColor Scatter timestamp sequenc)    = Ghost gPos gColor Scatter timestamp sequenc
@@ -36,7 +35,7 @@ randomElementFromList list = do
 pickNewRandomPosition::Player->GameState->Player
 pickNewRandomPosition (Ghost gPos gColor Frightened timestamp sequenc) gstate = (Ghost newPos gColor Frightened timestamp sequenc)
   where
-    newPosOptions = getWalkableNeighborTilePositions gstate gPos
+    newPosOptions = (getWalkableNeighborTilePositions gstate gPos) ++ [gPos]
     amountOfOptions = length newPosOptions
     newPos = unsafePerformIO $ randomElementFromList newPosOptions
 

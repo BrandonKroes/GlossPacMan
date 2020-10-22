@@ -21,6 +21,5 @@ updateAnimationTime deltaTime gstate = gstate {animationTime = deltaTime + anima
 resetAnimationTime::GameState->GameState
 resetAnimationTime gstate = gstate {animationTime=0.0}
 
-
 updateAnimationInterval:: GameState -> GameState
 updateAnimationInterval gstate | 0.35 <= animationTime gstate = resetAnimationTime gstate {animationInterval = flipVal $ animationInterval gstate } | otherwise = gstate

@@ -33,7 +33,8 @@ getPacManAlternatingIntervalTexture direction | direction == UP = pacmanUp2
   | direction == RIGHT = pacmanRight2
 
 getGhostTexture :: GhostColor -> GhostState -> Int -> Picture
-getGhostTexture gColor Frightened _ = gFrightened
+getGhostTexture gColor Frightened 1 = gFrightened
+getGhostTexture gColor Frightened 2 = gFrightened2
 getGhostTexture gColor Retreat _ = gRetreat
 getGhostTexture gColor _ 1 = getGhostIntervalTexture gColor
 getGhostTexture gColor _ 2 = getGhostAlternatingTexture gColor

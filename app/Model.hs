@@ -25,10 +25,10 @@ runningGameState = GameState
     { runningState = RUNNING,
       player = PacMan (14, 23) 0 UP,
       ghosts =
-        [ Ghost (13, 14) RED    Idle 0.0 0,
-          Ghost (14, 14) ORANGE Idle 0.0 0,
-          Ghost (15, 14) PINK   Idle 0.0 0,
-          Ghost (16, 14) CYAN   Idle 0.0 0
+        [ Ghost (13, 14) RED    Chase 0.0 0,
+          Ghost (14, 14) ORANGE Chase 0.0 0,
+          Ghost (15, 14) PINK   Chase 0.0 0,
+          Ghost (16, 14) CYAN   Chase 0.0 0
         ],
       world = getDefaultWorld,
       pause = False,

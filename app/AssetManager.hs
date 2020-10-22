@@ -47,12 +47,11 @@ gFrightened = pngByFile "frightened.png"
 gRetreat = pngByFile "retreat.png"
 
 
-gRed2 = pngByFile "red.png"
-gPink2 = pngByFile "pink.png"
-gCyan2 = pngByFile "cyan.png"
-gOrange2 = pngByFile "orange.png"
-gFrightened2 = pngByFile "frightened.png"
-gRetreat2 = pngByFile "retreat.png"
+gRed2 = pngByFile "red2.png"
+gPink2 = pngByFile "pink2.png"
+gCyan2 = pngByFile "cyan2.png"
+gOrange2 = pngByFile "orange2.png"
+gFrightened2 = pngByFile "frightened2.png"
 
 
 
