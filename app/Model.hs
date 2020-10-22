@@ -55,6 +55,17 @@ initialGameState = GameState
         animationInterval=1
       }
 
+
+type GhostBehaviour = (Int, GhostState)
+
+getTimeOutTime::Int->Int
+getTimeOutTime 1 = 100000000000
+getTimeOutTime sequenceId = [7, 20, 7, 20, 5, 20, 5, maxBound-100000] !! sequenceId
+
+
+
+
+
 data RunningState = START | RUNNING | WON | LOST deriving (Show, Eq)
 
 
@@ -179,7 +190,6 @@ samePosition pos = \x -> (position x) == pos
 
 notSamePosition::(Int, Int) -> Player -> Bool
 notSamePosition pos = \x -> (position x) /= pos
-
 
 
 
