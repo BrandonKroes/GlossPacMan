@@ -80,7 +80,7 @@ getPlayerPosition player = position player
 data Tile = Walkable Field (Int, Int) | NotWalkable WallType (Int, Int)
 
 isWalkable :: Tile -> Bool
-isWalkable (Walkable field position) = True
+isWalkable (Walkable _ _) = True
 isWalkable _ = False
 
 isDot::Tile->Bool
@@ -108,11 +108,37 @@ countAmountOfDots::World->Int
 countAmountOfDots w = length $ filter (isDot) w
 
 getTileByPosition::GameState -> (Int, Int)->Tile
---getTileByPosition gstate (x, y) = (world gstate) !! ((x) * 28 + y) TODO Debug!!!
 getTileByPosition gstate index = fromJust . find(isTile index) $ world gstate
 
 getTileIndexByPosition::GameState -> (Int, Int)->Int
 getTileIndexByPosition gstate index = fromJust . findIndex(isTile index) $ world gstate
+
+
+getWalkableNeighborTilePositions::GameState->(Int, Int)->[(Int, Int)]
+getWalkableNeighborTilePositions gstate position = map getPositionFromTile $ getWalkableNeighborTile gstate position
+
+getWalkableNeighborTile::GameState->(Int,Int)->[Tile]
+getWalkableNeighborTile gstate position = filter (isWalkable) $ getNeighborTile gstate position
+
+getNeighborTile::GameState->(Int, Int) -> [Tile]
+getNeighborTile gstate (x, y) =
+  getSafeTile gstate (x-1, y) ++
+  getSafeTile gstate (x+1, y) ++
+  getSafeTile gstate (x, y-1) ++
+  getSafeTile gstate (x, y+1)
+
+
+getSafeTile::GameState->(Int, Int) -> [Tile]
+getSafeTile gstate (_, 29) = []
+getSafeTile gstate (27, _) = []
+getSafeTile gstate (_, 2) = []
+getSafeTile gstate (2, _) = []
+getSafeTile gstate pos = [getTileByPosition gstate pos]
+
+
+getPositionFromTile::Tile->(Int, Int)
+getPositionFromTile (Walkable field position) = position
+getPositionFromTile (NotWalkable _ position) = position
 
 isTile::(Int, Int) -> Tile -> Bool
 isTile checkPos (Walkable field position) | checkPos == position = True | otherwise = False

@@ -1,7 +1,8 @@
 {-# LANGUAGE MultiWayIf #-}
 
 module Logic.Ghost where
-
+import System.IO.Unsafe
+import System.Random
 import Logic.PathFinding
 import Logic.Player
 import Constants
@@ -17,14 +18,28 @@ updateGhost gstate (Ghost gPos gColor Scatter timestamp sequenc)    = Ghost gPos
 updateGhost gstate (Ghost gPos gColor Chase timestamp sequenc)      = updateGhostByChase (Ghost gPos gColor Chase timestamp sequenc) gstate
 updateGhost gstate ghost = ghost
 
-
-
 updateGhostByFrightened::Player->GameState->Player
-updateGhostByFrightened (Ghost gPos gColor Frightened timestamp sequenc) gstate | (time gstate) >= (timestamp) = setGhostToState Chase (time gstate) (Ghost gPos gColor Frightened timestamp sequenc)
+updateGhostByFrightened (Ghost gPos gColor Frightened timestamp sequenc) gstate
+    | (time gstate) >= (timestamp) = setGhostToState Chase (time gstate) (Ghost gPos gColor Frightened timestamp sequenc)
+    | otherwise = pickNewRandomPosition (Ghost gPos gColor Frightened timestamp sequenc) gstate
 updateGhostByFrightened ghost gstate  = ghost
 
+rng :: Int -> IO Int
+rng upper = randomRIO (0,upper-1)
+
+randomElementFromList :: [a] -> IO a
+randomElementFromList list = do
+  r <- rng (length list)
+  return $ list !! r
 
 
+pickNewRandomPosition::Player->GameState->Player
+pickNewRandomPosition (Ghost gPos gColor Frightened timestamp sequenc) gstate = (Ghost newPos gColor Frightened timestamp sequenc)
+  where
+    newPosOptions = getWalkableNeighborTilePositions gstate gPos--TODO pick random
+    amountOfOptions = length newPosOptions
+    --randomIndex = randomR (0, amountOfOptions)
+    newPos = unsafePerformIO $ randomElementFromList newPosOptions
 
 -- Nested guarding isn't a thing in haskell, so abstracting it.
 updateGhostByChase::Player -> GameState -> Player
