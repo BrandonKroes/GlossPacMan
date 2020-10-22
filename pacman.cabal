@@ -48,14 +48,21 @@ executable pacman-exe
       Rendering
       AssetManager
       Controller
+      Constants
       Logic.FrameTime
       Logic.PathFinding
       Logic.Player
       Logic.Ghost
       Logic.World
       Logic.Conditions
+      Render.Player
+      Render.World
+      Render.Override
+      Render.Util
+      Render.Stats
+
   hs-source-dirs:
-      app app/Logic
+      app app/Logic app/Render
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
@@ -64,7 +71,9 @@ executable pacman-exe
     , gloss-juicy
     , random
     , search-algorithms
-    , directory
+    , strict
+    , data-fix
+    , aeson
   default-language: Haskell2010
 
 test-suite pacman-test
@@ -81,5 +90,7 @@ test-suite pacman-test
     , gloss
     , random
     , search-algorithms
-    , directory
+    , aeson
+    , strict
+    , data-fix
   default-language: Haskell2010

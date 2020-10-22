@@ -4,8 +4,8 @@
 
 Pac-Man
  - [x] Movement
- - [ ] Collecting dots
- - [ ] Collecting coins
+ - [x] Collecting dots
+ - [x] Collecting coins
  - [ ] Eating ghosts
 
 Ghosts
@@ -19,4 +19,4 @@ Ghosts
 
 
 
-# Running issues: If you get a GLUT related error, this seemed to solve the problem for us: https://stackoverflow.com/questions/8956387/cant-get-freeglut-to-work-with-haskell-on-windows
+### Running issues: If you get a GLUT related error, this seemed to solve the problem for us: https://stackoverflow.com/questions/8956387/cant-get-freeglut-to-work-with-haskell-on-windows

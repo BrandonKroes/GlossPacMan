@@ -2,6 +2,11 @@ module AssetManager where
 
 import Paths_pacman
 
+{-# LANGUAGE OverloadedStrings, DeriveGeneric, DeriveAnyClass #-}
+
+import GHC.Generics
+import Data.Aeson.Text (encodeToLazyText)
+import Data.Aeson (ToJSON)
 
 -- Standard Lib imports
 import System.IO.Unsafe
@@ -12,18 +17,23 @@ import Data.Maybe
 import Graphics.Gloss
 import Graphics.Gloss.Juicy
 
--- Static function calls for images.
--- I'm not sure when and how they are loaded in (i.e. IO calls)
--- TODO: Figure out IO procedure
--- TODO: Making path relative
--- TODO: https://hackage.haskell.org/package/reactive-banana-threepenny-0.7.1.3/src/src/Paths.hs
 
-door = pngByFile "door.png"
+-- Handmade imports
+import Model
+
+
+imgDoor = pngByFile "door.png"
 wVertical = pngByFile "vertical.png"
 wHorizontal = pngByFile "horizontal.png"
-empty = pngByFile "empty.png"
-coin = pngByFile "coin.png"
-dot = pngByFile "dot.png"
+imgEmpty = pngByFile "empty.png"
+imgCoin = pngByFile "coin.png"
+imgDot = pngByFile "dot.png"
+
+pacmanUp2 = pngByFile "pacmanUp2.png"
+pacmanDown2 = pngByFile "pacmanDown2.png"
+pacmanLeft2 = pngByFile "pacmanLeft2.png"
+pacmanRight2 = pngByFile "pacmanRight2.png"
+
 pacmanUp = pngByFile "pacmanUp.png"
 pacmanDown = pngByFile "pacmanDown.png"
 pacmanLeft = pngByFile "pacmanLeft.png"
@@ -34,6 +44,17 @@ gPink = pngByFile "pink.png"
 gCyan = pngByFile "cyan.png"
 gOrange = pngByFile "orange.png"
 gFrightened = pngByFile "frightened.png"
+gRetreat = pngByFile "retreat.png"
+
+
+gRed2 = pngByFile "red2.png"
+gPink2 = pngByFile "pink2.png"
+gCyan2 = pngByFile "cyan2.png"
+gOrange2 = pngByFile "orange2.png"
+gFrightened2 = pngByFile "frightened2.png"
+
+
+
 
 getDataFN :: FilePath -> IO FilePath
 getDataFN name = do
