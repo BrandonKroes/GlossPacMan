@@ -24,7 +24,7 @@ runningGameState = GameState
     { runningState = RUNNING,
       player = PacMan (14, 23) 0 (UP, NOTHING) ,
       ghosts =
-        [ Ghost (13, 14) RED Idle,
+        [ Ghost (14, 12) RED Idle,
           Ghost (14, 14) ORANGE Idle,
           Ghost (15, 14) PINK Idle,
           Ghost (16, 14) CYAN Idle

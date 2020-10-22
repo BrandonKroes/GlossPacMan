@@ -8,10 +8,16 @@ import Model
 
 -- Updating the ghost
 updateGhosts :: GameState -> GameState
-updateGhosts gstate = gstate {ghosts = map (updateGhost gstate) $ ghosts gstate}
+updateGhosts gstate = gstate {ghosts = newGhostlist}
+  where newGhostlist = recCheck gstate [] $ ghosts gstate
 
-updateGhostDec gstate ghost@(Ghost pos _ _)  = if checkOverlapGhosts new_g gstate then (Ghost pos color gState) else new_g
-  where new_g@(Ghost gPos color gState) = updateGhost gstate ghost
+recCheck :: GameState -> [Player] -> [Player] -> [Player]     
+recCheck gstate new [] = new
+recCheck gstate new (x@(Ghost opos ocolor ostate):xs) = let newG@(Ghost npos ncolor nstate) = updateGhost gstate x in
+                               case npos `elem` [pos | (Ghost pos _ _) <- xs] || npos `elem` [pos | (Ghost pos _ _) <- new] of
+                                 True -> recCheck gstate ( (Ghost opos ncolor nstate) : new) xs
+                                 _    -> recCheck gstate (newG : new) xs
+
 
 updateGhost:: GameState -> Player -> Player
 updateGhost gstate (Ghost gPos RED gState)  = getRedGhost (Ghost gPos RED gState) gstate
@@ -24,10 +30,6 @@ updateGposAstar :: GameState -> (Int, Int) -> (Int, Int) -> (Int, Int)
 updateGposAstar gstate start end = case findPath gstate start end of
                                     Just (steps, (x : xs)) -> x
                                     _ -> start
-
-checkOverlapGhosts :: Player -> GameState -> Bool
-checkOverlapGhosts (Ghost pos color _) gstate = elem pos ps
-  where ps = [p | (Ghost p c _) <- (ghosts gstate), c /= color ]
 
 nextPosScatter::GameState -> (Int, Int) -> (Int, Int) -> ((Int, Int), GhostState)
 nextPosScatter gstate start des = let new_pos = updateGposAstar gstate start des in
@@ -132,6 +134,6 @@ getPinkGhost (Ghost gPos gColor gState@ToScatterPlace) gstate = Ghost pos gColor
 getPinkGhost ghost@(Ghost gPos gColor gState@(Scatter ds)) gstate = Ghost pos gColor (Scatter route)
   where (pos, route) = getNewDirPos ghost gstate
 
-getPinkGhost ghost@(Ghost gPos gColor Idle) gstate = updateIdleGhost ghost gstate 5
+getPinkGhost ghost@(Ghost gPos gColor Idle) gstate = updateIdleGhost ghost gstate 0
 
 getPinkGhost g _ = g
