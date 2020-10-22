@@ -1,22 +1,23 @@
 {-# LANGUAGE OverloadedStrings, DeriveGeneric, DeriveAnyClass, StandaloneDeriving #-}
 module Model where
 
-
-
+import Constants
 import Data.List
 import Data.Maybe
 import Data.Aeson (ToJSON)
 import GHC.Generics
 
 data GameState = GameState
-  { runningState :: RunningState,
-    player :: Player,
-    world :: World,
-    ghosts :: Ghosts,
-    pause :: Bool,
-    consumablesLeft :: Int,
-    consumablesTotal::Int,
-    time::Float
+  { runningState     :: RunningState,
+    player           :: Player,
+    world            :: World,
+    ghosts           :: Ghosts,
+    pause            :: Bool,
+    consumablesLeft  :: Int,
+    consumablesTotal :: Int,
+    time             :: Float,
+    animationTime    :: Float,
+    animationInterval:: Int
   }
 
 runningGameState :: GameState
@@ -24,16 +25,18 @@ runningGameState = GameState
     { runningState = RUNNING,
       player = PacMan (14, 23) 0 (UP, NOTHING) ,
       ghosts =
-        [ Ghost (14, 12) RED Idle,
-          Ghost (14, 14) ORANGE Idle,
-          Ghost (15, 14) PINK Idle,
-          Ghost (16, 14) CYAN Idle
+        [ Ghost (14, 12) RED    Chase 0.0 0,
+          Ghost (14, 14) ORANGE Chase 0.0 0,
+          Ghost (15, 14) PINK   Chase 0.0 0,
+          Ghost (16, 14) CYAN   Chase 0.0 0
         ],
       world = getDefaultWorld,
       pause = False,
       consumablesTotal = countAmountOfDots getDefaultWorld,
       consumablesLeft = countAmountOfDots getDefaultWorld,
-      time=0.0
+      time=0.0,
+      animationTime = 0,
+      animationInterval=1
     }
 
 initialGameState :: GameState
@@ -47,7 +50,9 @@ initialGameState = GameState
         pause = False,
         consumablesTotal = 0,
         consumablesLeft =  0,
-        time=0.0
+        time=0.0,
+        animationTime = 0,
+        animationInterval=1
       }
 
 data RunningState = START | RUNNING | WON | LOST deriving (Show, Eq)
@@ -60,16 +65,16 @@ data Player
         direction :: (Direction, Direction)
       }
   | Ghost
-      { position :: (Int, Int),
-        gColor :: GhostColor,
-        state :: GhostState
+      { position  :: (Int, Int),
+        gColor    :: GhostColor,
+        state     :: GhostState,
+        timestamp :: Float,
+        sequence  :: Int
       }
 
 type Ghosts = [Player]
 
 data GhostColor = RED | ORANGE | PINK | CYAN deriving (Show, Eq)
-
-
 
 getGhostsPosition::Ghosts->[(Int, Int)]
 getGhostsPosition ghosts = map getPlayerPosition ghosts
@@ -81,7 +86,7 @@ getPlayerPosition player = position player
 data Tile = Walkable Field (Int, Int) | NotWalkable WallType (Int, Int)
 
 isWalkable :: Tile -> Bool
-isWalkable (Walkable field position) = True
+isWalkable (Walkable _ _) = True
 isWalkable _ = False
 
 isDot::Tile->Bool
@@ -97,6 +102,10 @@ isConsumable::Tile->Bool
 isConsumable (Walkable field _) | field==Empty=False |field==DOOR=False | otherwise=True
 isConsumable _ = False
 
+isCoin::Tile->Bool
+isCoin (Walkable field _) | field==Coin=True | otherwise=False
+isCoin _ = False
+
 data Field = Coin | Bonus | Empty | Dot | DOOR deriving (Show, Eq)
 
 type World = [Tile]
@@ -105,18 +114,90 @@ countAmountOfDots::World->Int
 countAmountOfDots w = length $ filter (isDot) w
 
 getTileByPosition::GameState -> (Int, Int)->Tile
---getTileByPosition gstate (x, y) = (world gstate) !! ((x) * 28 + y) TODO Debug!!!
 getTileByPosition gstate index = fromJust . find(isTile index) $ world gstate
 
 getTileIndexByPosition::GameState -> (Int, Int)->Int
 getTileIndexByPosition gstate index = fromJust . findIndex(isTile index) $ world gstate
 
+
+getWalkableNeighborTilePositions::GameState->(Int, Int)->[(Int, Int)]
+getWalkableNeighborTilePositions gstate position = map getPositionFromTile $ getWalkableNeighborTile gstate position
+
+getWalkableNeighborTile::GameState->(Int,Int)->[Tile]
+getWalkableNeighborTile gstate position = filter (isWalkable) $ getNeighborTile gstate position
+
+getNeighborTile::GameState->(Int, Int) -> [Tile]
+getNeighborTile gstate (x, y) =
+  getSafeTile gstate (x-1, y) ++
+  getSafeTile gstate (x+1, y) ++
+  getSafeTile gstate (x, y-1) ++
+  getSafeTile gstate (x, y+1)
+
+
+getSafeTile::GameState->(Int, Int) -> [Tile]
+getSafeTile gstate (_, 29) = []
+getSafeTile gstate (27, _) = []
+getSafeTile gstate (_, 2) = []
+getSafeTile gstate (2, _) = []
+getSafeTile gstate pos = [getTileByPosition gstate pos]
+
+
+getPositionFromTile::Tile->(Int, Int)
+getPositionFromTile (Walkable field position) = position
+getPositionFromTile (NotWalkable _ position) = position
+
 isTile::(Int, Int) -> Tile -> Bool
 isTile checkPos (Walkable field position) | checkPos == position = True | otherwise = False
 isTile checkPos (NotWalkable _ position) | checkPos == position = True | otherwise = False
 
+
 data Direction =  UP   | DOWN  | LEFT       | RIGHT      | NOTHING deriving (Show, Eq)
 data GhostState = Idle | Chase | Retreat    | Frightened | Scatter [Direction] | ToScatterPlace deriving (Show, Eq)
+
+setGhostsToState::GhostState->[Player]->Float->[Player]
+setGhostsToState ghostState ghosts time = map (setGhostToState ghostState time) ghosts
+
+setGhostToState::GhostState->Float->Player->Player
+setGhostToState nState time = \g -> g {state=nState, timestamp=time}
+
+
+isNonLethal::Player->Bool
+isNonLethal (Ghost gPos gColor state timestamp sequenc) = elem state getNonLethalGhostStates
+
+isLethal::Player->Bool
+isLethal (Ghost gPos gColor state timestamp sequenc) = elem state getLethalGhostStates
+
+isStateGhost::GhostState->Player->Bool
+isStateGhost state (Ghost gPos gColor gState timestamp sequenc) = gState == state
+
+isNotStateGhost::GhostState->Player->Bool
+isNotStateGhost state (Ghost gPos gColor gState timestamp sequenc) = not (gState == state)
+
+
+samePosition::(Int, Int) -> Player -> Bool
+samePosition pos = \x -> (position x) == pos
+
+notSamePosition::(Int, Int) -> Player -> Bool
+notSamePosition pos = \x -> (position x) /= pos
+
+
+
+
+frightenedGhostsOnPlayer::[Player] -> [Player]
+frightenedGhostsOnPlayer players = filter (isStateGhost Frightened) players
+
+getNonLethalGhostStates::[GhostState]
+getNonLethalGhostStates = [Retreat, Frightened]
+
+getLethalGhostStates::[GhostState]
+getLethalGhostStates = [Idle, Chase, Scatter [UP], ToScatterPlace ]
+
+getNonLethalGhosts::[Player] -> [Player]
+getNonLethalGhosts ghosts = filter (isNonLethal) ghosts
+
+getDeadlyGhostsPosition::Ghosts -> [(Int, Int)]
+getDeadlyGhostsPosition players = getGhostsPosition $ filter (isLethal) players
+
 
 -- TODO currently angled walls arent used
 data WallType = VERTICAL | LANGLE | RANGLE | HORIZONTAL deriving (Show, Eq)

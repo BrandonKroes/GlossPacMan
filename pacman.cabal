@@ -48,6 +48,7 @@ executable pacman-exe
       Rendering
       AssetManager
       Controller
+      Constants
       Logic.FrameTime
       Logic.PathFinding
       Logic.Player

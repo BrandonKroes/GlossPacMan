@@ -12,25 +12,49 @@ renderPlayers::GameState -> [Picture]
 renderPlayers gstate = (renderPlayer gstate) ++ (renderGhosts gstate)
 
 renderPlayer :: GameState -> [Picture]
-renderPlayer g = [renderPlayerType $ player g]
+renderPlayer g = [renderPlayerType  g $ player g]
 
-getPacManTexture :: Direction -> Picture
-getPacManTexture direction | direction == UP = pacmanUp
+
+getPacManTexture::Direction -> Int -> Picture
+getPacManTexture direction 1 = getPacManIntervalTexture direction
+getPacManTexture direction 2 = getPacManAlternatingIntervalTexture direction
+
+
+getPacManIntervalTexture::Direction -> Picture
+getPacManIntervalTexture direction | direction == UP = pacmanUp
   | direction == DOWN = pacmanDown
   | direction == LEFT = pacmanLeft
   | direction == RIGHT = pacmanRight
 
-getGhostTexture :: GhostColor -> GhostState -> Picture
-getGhostTexture gColor state
-  | state == Frightened = gFrightened
-  | gColor == RED = gRed
+getPacManAlternatingIntervalTexture::Direction -> Picture
+getPacManAlternatingIntervalTexture direction | direction == UP = pacmanUp2
+  | direction == DOWN = pacmanDown2
+  | direction == LEFT = pacmanLeft2
+  | direction == RIGHT = pacmanRight2
+
+getGhostTexture :: GhostColor -> GhostState -> Int -> Picture
+getGhostTexture gColor Frightened 1 = gFrightened
+getGhostTexture gColor Frightened 2 = gFrightened2
+getGhostTexture gColor Retreat _ = gRetreat
+getGhostTexture gColor _ 1 = getGhostIntervalTexture gColor
+getGhostTexture gColor _ 2 = getGhostAlternatingTexture gColor
+
+getGhostIntervalTexture::GhostColor -> Picture
+getGhostIntervalTexture gColor | gColor == RED = gRed
   | gColor == PINK = gPink
   | gColor == CYAN = gCyan
   | gColor == ORANGE = gOrange
 
-renderPlayerType :: Player -> Picture
-renderPlayerType (PacMan position score (direction,_)) = translatePlayerByPosition position $ getPacManTexture direction
-renderPlayerType (Ghost position gColor state) = translatePlayerByPosition position $ getGhostTexture gColor state
+getGhostAlternatingTexture::GhostColor -> Picture
+getGhostAlternatingTexture gColor
+  | gColor == RED = gRed2
+  | gColor == PINK = gPink2
+  | gColor == CYAN = gCyan2
+  | gColor == ORANGE = gOrange2
+
+renderPlayerType :: GameState -> Player -> Picture
+renderPlayerType gstate (PacMan position score (direction,_))  = translatePlayerByPosition position $ getPacManTexture direction (animationInterval gstate)
+renderPlayerType gstate (Ghost position gColor state timestamp sequenc)  = translatePlayerByPosition position $ getGhostTexture gColor state $ animationInterval gstate
 
 renderGhosts :: GameState -> [Picture]
-renderGhosts g = map renderPlayerType $ ghosts g
+renderGhosts gstate = map (renderPlayerType gstate)  (ghosts gstate)
