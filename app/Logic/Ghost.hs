@@ -36,9 +36,8 @@ randomElementFromList list = do
 pickNewRandomPosition::Player->GameState->Player
 pickNewRandomPosition (Ghost gPos gColor Frightened timestamp sequenc) gstate = (Ghost newPos gColor Frightened timestamp sequenc)
   where
-    newPosOptions = getWalkableNeighborTilePositions gstate gPos--TODO pick random
+    newPosOptions = getWalkableNeighborTilePositions gstate gPos
     amountOfOptions = length newPosOptions
-    --randomIndex = randomR (0, amountOfOptions)
     newPos = unsafePerformIO $ randomElementFromList newPosOptions
 
 -- Nested guarding isn't a thing in haskell, so abstracting it.
