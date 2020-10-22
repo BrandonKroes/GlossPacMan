@@ -165,7 +165,7 @@ isNonLethal::Player->Bool
 isNonLethal (Ghost gPos gColor state timestamp sequenc) = elem state getNonLethalGhostStates
 
 isLethal::Player->Bool
-isLethal (Ghost gPos gColor state timestamp sequenc) = elem state getLethalGhostStates
+isLethal ghost = not $ isNonLethal ghost
 
 isStateGhost::GhostState->Player->Bool
 isStateGhost state (Ghost gPos gColor gState timestamp sequenc) = gState == state
@@ -188,9 +188,6 @@ frightenedGhostsOnPlayer players = filter (isStateGhost Frightened) players
 
 getNonLethalGhostStates::[GhostState]
 getNonLethalGhostStates = [Retreat, Frightened]
-
-getLethalGhostStates::[GhostState]
-getLethalGhostStates = [Idle, Chase, Scatter [UP], ToScatterPlace ]
 
 getNonLethalGhosts::[Player] -> [Player]
 getNonLethalGhosts ghosts = filter (isNonLethal) ghosts
