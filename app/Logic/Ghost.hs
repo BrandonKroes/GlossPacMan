@@ -37,11 +37,11 @@ updateGhostByState gstate ghost = ghost
 flipGhostStateHunt::GameState -> Player->Player
 flipGhostStateHunt gstate (Ghost gPos gColor Chase timestamp sequenc) = newGhost
   where
-    scatterDirection = (getTotalRouteByColor gColor)
+    --scatterDirection = (getTotalRouteByColor gColor)
     newTimeOutTime = getTimeOutTime sequenc
     newSequenceNumber = sequenc+1
-    scatterState = Scatter scatterDirection
-    newGhost =  setGhostToState scatterState ((time gstate) + fromIntegral newTimeOutTime) (Ghost gPos gColor Chase timestamp newSequenceNumber)
+    --scatterState = Scatter scatterDirection
+    newGhost =  setGhostToState ToScatterPlace ((time gstate) + fromIntegral newTimeOutTime) (Ghost gPos gColor Chase timestamp newSequenceNumber)
 
 flipGhostStateHunt gstate g@(Ghost gPos gColor (Scatter _) timestamp sequenc) = newGhost
   where
