@@ -23,8 +23,20 @@ recCheck gstate new (x@(Ghost opos ocolor ostate timestamp sequence):xs) = let n
 updateGhost :: GameState -> Player -> Player
 updateGhost gstate g@(Ghost gPos gColor gState timestamp sequenc)
             | gState == Frightened = updateGhostByFrightened g gstate
+            | gState == Retreat = updateGhostByRetreat gstate g 
+            | gState == Idle = updateGhostByState gstate g
             | (time gstate) >= (timestamp) = flipGhostStateHunt gstate g
             | otherwise = updateGhostByState gstate g
+
+updateGhostByRetreat :: GameState -> Player -> Player
+updateGhostByRetreat gstate g@(Ghost gPos color gState t s ) = let (r:o:p:c:[]) = (ghosts runningGameState)  
+                                                                   newPos = case color of
+                                                                              RED -> updateGposAstar gstate gPos $ position r
+                                                                              PINK -> updateGposAstar gstate gPos $ position p
+                                                                              ORANGE -> updateGposAstar gstate gPos $ position o
+                                                                              CYAN -> updateGposAstar gstate gPos $ position c
+                                                                    in 
+                                                                if gPos == newPos then (Ghost gPos color Idle t s ) else (Ghost newPos color gState t s )
 
 updateGhostByState::GameState->Player ->Player
 updateGhostByState gstate g@(Ghost gPos RED gState _ _ )  = getRedGhost g gstate
@@ -37,10 +49,8 @@ updateGhostByState gstate ghost = ghost
 flipGhostStateHunt::GameState -> Player->Player
 flipGhostStateHunt gstate (Ghost gPos gColor Chase timestamp sequenc) = newGhost
   where
-    --scatterDirection = (getTotalRouteByColor gColor)
     newTimeOutTime = getTimeOutTime sequenc
     newSequenceNumber = sequenc+1
-    --scatterState = Scatter scatterDirection
     newGhost =  setGhostToState ToScatterPlace ((time gstate) + fromIntegral newTimeOutTime) (Ghost gPos gColor Chase timestamp newSequenceNumber)
 
 flipGhostStateHunt gstate g@(Ghost gPos gColor (Scatter _) timestamp sequenc) = newGhost
@@ -90,15 +100,6 @@ getTotalRoute (Ghost _ ORANGE _ _ _ ) = [RIGHT, RIGHT, UP, LEFT, UP, LEFT, DOWN,
 getTotalRoute (Ghost _ CYAN _ _ _ ) = [LEFT, LEFT, UP, RIGHT, UP, RIGHT, DOWN, RIGHT, DOWN]
 getTotalRoute (Ghost _ PINK _ _ _ ) = [DOWN, DOWN, RIGHT, UP, LEFT]
 getTotalRoute (Ghost _ RED _ _ _ ) = [DOWN, DOWN, LEFT, UP, RIGHT]
-
-
-
---TODO: rely on above function
-getTotalRouteByColor::GhostColor -> [Direction]
-getTotalRouteByColor ORANGE = [RIGHT, RIGHT, UP, LEFT, UP, LEFT, DOWN, LEFT, DOWN]
-getTotalRouteByColor CYAN   = [LEFT, LEFT, UP, RIGHT, UP, RIGHT, DOWN, RIGHT, DOWN]
-getTotalRouteByColor PINK   = [DOWN, DOWN, RIGHT, UP, LEFT]
-getTotalRouteByColor RED    = [DOWN, DOWN, LEFT, UP, RIGHT]
 
 
 getNewDirPos:: Player -> GameState -> ((Int,Int), [Direction])
