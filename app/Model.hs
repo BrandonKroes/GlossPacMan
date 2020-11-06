@@ -25,10 +25,10 @@ runningGameState = GameState
     { runningState = RUNNING,
       player = PacMan (14, 23) 0 (UP, NOTHING) ,
       ghosts =
-        [ Ghost (14, 12) RED    Idle 0.0 0,
-          Ghost (14, 14) ORANGE Idle 0.0 0,
-          Ghost (15, 14) PINK   Idle 0.0 0,
-          Ghost (16, 14) CYAN   Idle 0.0 0
+        [ Ghost (14, 12) RED    Idle 0.0 0 UP,
+          Ghost (14, 14) ORANGE Idle 0.0 0 UP,
+          Ghost (15, 14) PINK   Idle 0.0 0 UP,
+          Ghost (16, 14) CYAN   Idle 0.0 0 UP
         ],
       world = getDefaultWorld,
       pause = False,
@@ -77,7 +77,8 @@ data Player
         gColor    :: GhostColor,
         state     :: GhostState,
         timestamp :: Float,
-        sequence  :: Int
+        sequence  :: Int,
+        gDirection :: Direction
       }
 
 type Ghosts = [Player]
@@ -170,16 +171,16 @@ setGhostToState nState time = \g -> g {state=nState, timestamp=time}
 
 
 isNonLethal::Player->Bool
-isNonLethal (Ghost gPos gColor state timestamp sequenc) = elem state getNonLethalGhostStates
+isNonLethal (Ghost _ _ state _ _ _) = elem state getNonLethalGhostStates
 
 isLethal::Player->Bool
 isLethal ghost = not $ isNonLethal ghost
 
 isStateGhost::GhostState->Player->Bool
-isStateGhost state (Ghost gPos gColor gState timestamp sequenc) = gState == state
+isStateGhost state (Ghost _ _ gState _ _ _) = gState == state
 
 isNotStateGhost::GhostState->Player->Bool
-isNotStateGhost state (Ghost gPos gColor gState timestamp sequenc) = gState /= state
+isNotStateGhost state (Ghost _ _ gState _ _ _) = gState /= state
 
 
 samePosition::(Int, Int) -> Player -> Bool
@@ -203,10 +204,10 @@ getDeadlyGhostsPosition players = getGhostsPosition $ filter (isLethal) players
 
 -- the total route the ghost need to walk (first one is always double)
 getTotalRoute :: Player -> [Direction]
-getTotalRoute (Ghost _ ORANGE _ _ _ ) = [RIGHT, RIGHT, UP, LEFT, UP, LEFT, DOWN, LEFT, DOWN]
-getTotalRoute (Ghost _ CYAN _ _ _ ) = [LEFT, LEFT, UP, RIGHT, UP, RIGHT, DOWN, RIGHT, DOWN]
-getTotalRoute (Ghost _ PINK _ _ _ ) = [DOWN, DOWN, RIGHT, UP, LEFT]
-getTotalRoute (Ghost _ RED _ _ _ ) = [DOWN, DOWN, LEFT, UP, RIGHT]
+getTotalRoute (Ghost _ ORANGE _ _ _ _) = [RIGHT, RIGHT, UP, LEFT, UP, LEFT, DOWN, LEFT, DOWN]
+getTotalRoute (Ghost _ CYAN _ _ _ _) = [LEFT, LEFT, UP, RIGHT, UP, RIGHT, DOWN, RIGHT, DOWN]
+getTotalRoute (Ghost _ PINK _ _ _ _) = [DOWN, DOWN, RIGHT, UP, LEFT]
+getTotalRoute (Ghost _ RED _ _ _ _) = [DOWN, DOWN, LEFT, UP, RIGHT]
 
 getScatterStart :: GhostColor -> (Int, Int)
 getScatterStart RED = (27,2)
