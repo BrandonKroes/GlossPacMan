@@ -208,6 +208,12 @@ getTotalRoute (Ghost _ CYAN _ _ _ ) = [LEFT, LEFT, UP, RIGHT, UP, RIGHT, DOWN, R
 getTotalRoute (Ghost _ PINK _ _ _ ) = [DOWN, DOWN, RIGHT, UP, LEFT]
 getTotalRoute (Ghost _ RED _ _ _ ) = [DOWN, DOWN, LEFT, UP, RIGHT]
 
+getScatterStart :: GhostColor -> (Int, Int)
+getScatterStart RED = (27,2)
+getScatterStart PINK = (2,2)
+getScatterStart ORANGE = (2,29)
+getScatterStart CYAN = (27,29)
+
 
 -- TODO currently angled walls arent used
 data WallType = VERTICAL | LANGLE | RANGLE | HORIZONTAL deriving (Show, Eq)
