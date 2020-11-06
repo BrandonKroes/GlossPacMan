@@ -17,11 +17,11 @@ update currentFT gstate
   -- TODO: Find out if YODA conditions are considered good practice in Haskell.
   | pause gstate = return gstate
   | runningState gstate /= RUNNING = return gstate
-  | otherwise = return (conditions
+  | otherwise = conditions
       $ updateWorld
       $ updateGhosts
       $ updatePlayer
-      $ updateFrameTime gstate currentFT )
+      $ updateFrameTime gstate currentFT
 
 inputHandler :: Event -> GameState -> IO GameState
 inputHandler event gstate
