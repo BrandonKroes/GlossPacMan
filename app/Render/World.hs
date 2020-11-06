@@ -9,22 +9,29 @@ import AssetManager
 
 
 
-renderWorld :: GameState -> [Picture]
+renderWorld :: GameState -> IO [Picture]
 renderWorld game = parseWorld $ world game
 
-parseWorld :: World -> [Picture]
-parseWorld w = map parseTile w
+parseWorld :: World -> IO [Picture]
+parseWorld w = mapM parseTile w
 
-parseTile :: Tile -> Picture
-parseTile t = translatePictureByTile t $ tileToPicture t
+parseTile :: Tile -> IO Picture
+parseTile t = do ttp <- tileToPicture t
+                 return (translatePictureByTile t ttp)
 
-tileToPicture :: Tile -> Picture
+tileToPicture :: Tile -> IO Picture
 tileToPicture (NotWalkable wallType (x, y))
-  | wallType == VERTICAL = translatePicture (x, y) wVertical
-  | wallType == HORIZONTAL = translatePicture (x, y) wHorizontal
+  | wallType == VERTICAL = do p <- wVertical
+                              return (translatePicture (x, y) p)
+  | wallType == HORIZONTAL = do p <- wHorizontal
+                                return (translatePicture (x, y) p)
 tileToPicture (Walkable field (x, y))
-  | field == Coin = translatePicture (x, y) imgCoin
+  | field == Coin = do p <- imgCoin
+                       return (translatePicture (x, y) p)
   -- TODO: figure out why we had this field | field==Bonus =
-  | field == Empty = translatePicture (x, y) imgEmpty
-  | field == Dot = translatePicture (x, y) imgDot
-  | field == DOOR = translatePicture (x, y) imgDoor
+  | field == Empty = do p <- imgEmpty
+                        return (translatePicture (x, y) p)
+  | field == Dot = do p <- imgDot 
+                      return (translatePicture (x, y) p)
+  | field == DOOR = do p <- imgDoor
+                       return (translatePicture (x, y) p)

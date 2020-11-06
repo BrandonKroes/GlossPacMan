@@ -7,8 +7,8 @@ import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
 
 
-renderStats::GameState -> [Picture]
-renderStats gstate = [(translate (290) (475) (getConsumablesLeft gstate)),
+renderStats::GameState -> IO [Picture]
+renderStats gstate = return[(translate (290) (475) (getConsumablesLeft gstate)),
                       (translate (190) (475) (getConsumablesText)),
                       (translate (-90) (475) (getScore gstate)),
                       (translate (-170) (475) (getScoreText)),

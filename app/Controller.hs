@@ -11,25 +11,25 @@ import Logic.Conditions
 import Model
 
 -- The execution order of the gamestate is import for change detection
-update :: Float -> GameState -> GameState
+update :: Float -> GameState -> IO GameState
 update currentFT gstate
   -- check if the game is paused
   -- TODO: Find out if YODA conditions are considered good practice in Haskell.
-  | pause gstate = gstate
-  | runningState gstate /= RUNNING = gstate
-  | otherwise = conditions
+  | pause gstate = return gstate
+  | runningState gstate /= RUNNING = return gstate
+  | otherwise = return (conditions
       $ updateWorld
       $ updateGhosts
       $ updatePlayer
-      $ updateFrameTime gstate currentFT
+      $ updateFrameTime gstate currentFT )
 
-inputHandler :: Event -> GameState -> GameState
+inputHandler :: Event -> GameState -> IO GameState
 inputHandler event gstate
   | (runningState gstate) /= RUNNING = case event of
-                                        EventKey (SpecialKey _) Down _ _ -> runningGameState
-                                        EventKey (Char _) Down _ _ -> runningGameState
-                                        _ -> gstate
-  | otherwise = runningInputHandler event gstate
+                                        EventKey (SpecialKey _) Down _ _ -> return runningGameState
+                                        EventKey (Char _) Down _ _ -> return runningGameState
+                                        _ -> return gstate
+  | otherwise = return (runningInputHandler event gstate)
 
 runningInputHandler::Event -> GameState -> GameState
 runningInputHandler event gstate

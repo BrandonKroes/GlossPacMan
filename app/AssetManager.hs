@@ -61,12 +61,8 @@ getDataFN name = do
   dir <- getDataDir
   return (dir ++ "\\app\\assets\\" ++ name)
 
-getFilePath::String -> FilePath
-getFilePath s = unsafePerformIO $ getDataFN s
-
-pngByFile::FilePath -> Picture
-pngByFile p = dontDoThis $ loadJuicyPNG $ getFilePath p
-
--- Justification for this function: If the assets don't load, the game isn't worth much.
-dontDoThis :: IO (Maybe Picture) -> Picture
-dontDoThis = fromJust . unsafePerformIO
+pngByFile::FilePath -> IO Picture
+pngByFile p = do
+                fp <- getDataFN p
+                lj <- loadJuicyPNG fp
+                return (fromJust lj)

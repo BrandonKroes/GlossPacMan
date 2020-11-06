@@ -2,6 +2,7 @@ module Main where
 
 import Graphics.Gloss
 import Graphics.Gloss.Data.Color
+import Graphics.Gloss.Interface.IO.Game
 
 import Model
 import Controller
@@ -13,4 +14,7 @@ window = InWindow "PacMan" (screenWidth, screenHeight) (100, 100)
 
 
 main :: IO ()
-main = play window black fps initialGameState render inputHandler update
+main = playIO window black fps initialGameState render inputHandler update
+
+-- render -> rendering.hs
+-- inputHandler en update -> controller
