@@ -99,7 +99,7 @@ isWalkable (Walkable _ _) = True
 isWalkable _ = False
 
 isDot::Tile->Bool
-isDot (Walkable field _) = field == Dot || field == Coin 
+isDot (Walkable field _) = field == Dot || field == Coin
 isDot _ = False
 
 -- Only the Walkable tiles have the field so no pm is required.
@@ -164,10 +164,20 @@ data Direction =  UP   | DOWN  | LEFT       | RIGHT      | NOTHING deriving (Sho
 data GhostState = Idle | Chase | Retreat    | Frightened | Scatter [Direction] | ToScatterPlace deriving (Show, Eq)
 
 setGhostsToState::GhostState->[Player]->Float->[Player]
-setGhostsToState ghostState ghosts time = map (setGhostToState ghostState time) ghosts
+setGhostsToState ghostState ghosts time = nGhosts
+  where
+    nonApplicableGhosts = filter (\g -> not (ghostTransitionAllowed ghostState (state g))) ghosts
+    adjustableGhosts = filter (\g -> ghostTransitionAllowed ghostState (state g)) ghosts
+    applicableGhosts  =   map (setGhostToState ghostState time) adjustableGhosts
+    nGhosts = applicableGhosts ++ nonApplicableGhosts
 
 setGhostToState::GhostState->Float->Player->Player
 setGhostToState nState time = \g -> g {state=nState, timestamp=time}
+
+
+ghostTransitionAllowed::GhostState->GhostState->Bool
+ghostTransitionAllowed Frightened Idle = False
+ghostTransitionAllowed _  _ = True
 
 
 isNonLethal::Player->Bool
