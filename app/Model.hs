@@ -63,9 +63,6 @@ getTimeOutTime 1 = 100000000000
 getTimeOutTime sequenceId = [7, 20, 7, 20, 5, 20, 5, maxBound-100000] !! sequenceId
 
 
-
-
-
 data RunningState = START | RUNNING | WON | LOST deriving (Show, Eq)
 
 
@@ -101,7 +98,7 @@ isWalkable (Walkable _ _) = True
 isWalkable _ = False
 
 isDot::Tile->Bool
-isDot (Walkable field _) | field==Dot=True | field==Coin=True| otherwise=False
+isDot (Walkable field _) = field == Dot || field == Coin 
 isDot _ = False
 
 -- Only the Walkable tiles have the field so no pm is required.
@@ -110,11 +107,11 @@ setTileField (Walkable field position) nField = Walkable nField position
 setTileField t _ = t
 
 isConsumable::Tile->Bool
-isConsumable (Walkable field _) | field==Empty=False |field==DOOR=False | otherwise=True
+isConsumable (Walkable field _) = field /= Empty && field /= DOOR
 isConsumable _ = False
 
 isCoin::Tile->Bool
-isCoin (Walkable field _) | field==Coin=True | otherwise=False
+isCoin (Walkable field _) = field == Coin
 isCoin _ = False
 
 data Field = Coin | Bonus | Empty | Dot | DOOR deriving (Show, Eq)
@@ -158,8 +155,8 @@ getPositionFromTile (Walkable field position) = position
 getPositionFromTile (NotWalkable _ position) = position
 
 isTile::(Int, Int) -> Tile -> Bool
-isTile checkPos (Walkable field position) | checkPos == position = True | otherwise = False
-isTile checkPos (NotWalkable _ position) | checkPos == position = True | otherwise = False
+isTile checkPos (Walkable field position) = checkPos == position
+isTile checkPos (NotWalkable _ position) = checkPos == position
 
 
 data Direction =  UP   | DOWN  | LEFT       | RIGHT      | NOTHING deriving (Show, Eq)
@@ -182,7 +179,7 @@ isStateGhost::GhostState->Player->Bool
 isStateGhost state (Ghost gPos gColor gState timestamp sequenc) = gState == state
 
 isNotStateGhost::GhostState->Player->Bool
-isNotStateGhost state (Ghost gPos gColor gState timestamp sequenc) = not (gState == state)
+isNotStateGhost state (Ghost gPos gColor gState timestamp sequenc) = gState /= state
 
 
 samePosition::(Int, Int) -> Player -> Bool
@@ -190,7 +187,6 @@ samePosition pos = \x -> (position x) == pos
 
 notSamePosition::(Int, Int) -> Player -> Bool
 notSamePosition pos = \x -> (position x) /= pos
-
 
 
 frightenedGhostsOnPlayer::[Player] -> [Player]
@@ -204,6 +200,13 @@ getNonLethalGhosts ghosts = filter (isNonLethal) ghosts
 
 getDeadlyGhostsPosition::Ghosts -> [(Int, Int)]
 getDeadlyGhostsPosition players = getGhostsPosition $ filter (isLethal) players
+
+-- the total route the ghost need to walk (first one is always double)
+getTotalRoute :: Player -> [Direction]
+getTotalRoute (Ghost _ ORANGE _ _ _ ) = [RIGHT, RIGHT, UP, LEFT, UP, LEFT, DOWN, LEFT, DOWN]
+getTotalRoute (Ghost _ CYAN _ _ _ ) = [LEFT, LEFT, UP, RIGHT, UP, RIGHT, DOWN, RIGHT, DOWN]
+getTotalRoute (Ghost _ PINK _ _ _ ) = [DOWN, DOWN, RIGHT, UP, LEFT]
+getTotalRoute (Ghost _ RED _ _ _ ) = [DOWN, DOWN, LEFT, UP, RIGHT]
 
 
 -- TODO currently angled walls arent used

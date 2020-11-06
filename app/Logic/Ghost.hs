@@ -13,37 +13,41 @@ updateGhosts :: GameState -> GameState
 updateGhosts gstate = gstate {ghosts = newGhostlist}
   where newGhostlist = recCheck gstate [] $ ghosts gstate
 
+-- Checks if an updated ghost will go over another ghost his spot, does not allow that and retains its old position
 recCheck :: GameState -> [Player] -> [Player] -> [Player]
 recCheck gstate new [] = new
-recCheck gstate new (x@(Ghost opos ocolor ostate timestamp sequence):xs) = let newG@(Ghost npos ncolor nstate ntimestamp nsequence) = updateGhost gstate x in
-                               case npos `elem` [pos | (Ghost pos _ _ _ _) <- xs] || npos `elem` [pos | (Ghost pos _ _ _ _) <- new] of
-                                 True -> recCheck gstate ( (Ghost opos ncolor nstate ntimestamp nsequence) : new) xs
-                                 _    -> recCheck gstate (newG : new) xs
+recCheck gstate new (x@(Ghost opos ocolor ostate timestamp sequence):xs) = 
+  let newG@(Ghost npos ncolor nstate ntimestamp nsequence) = updateGhost gstate x in
+  case npos `elem` [pos | (Ghost pos _ _ _ _) <- (new ++ xs)] of
+       True -> recCheck gstate ( (Ghost opos ncolor nstate ntimestamp nsequence) : new) xs
+       _    -> recCheck gstate (newG : new) xs
 
 updateGhost :: GameState -> Player -> Player
+updateGhost gstate g@(Ghost _ _ Frightened _ _ ) = updateGhostByFrightened gstate g
+updateGhost gstate g@(Ghost _ _ Retreat _ _ ) = updateGhostByRetreat gstate g 
+updateGhost gstate g@(Ghost _ _ Idle _ _ ) = updateGhostByState gstate g           -- This one needs to be made explicitly clear
 updateGhost gstate g@(Ghost gPos gColor gState timestamp sequenc)
-            | gState == Frightened = updateGhostByFrightened g gstate
-            | gState == Retreat = updateGhostByRetreat gstate g 
-            | gState == Idle = updateGhostByState gstate g
             | (time gstate) >= (timestamp) = flipGhostStateHunt gstate g
             | otherwise = updateGhostByState gstate g
 
-updateGhostByRetreat :: GameState -> Player -> Player
-updateGhostByRetreat gstate g@(Ghost gPos color gState t s ) = let (r:o:p:c:[]) = (ghosts runningGameState)  
-                                                                   newPos = case color of
-                                                                              RED -> updateGposAstar gstate gPos $ position r
-                                                                              PINK -> updateGposAstar gstate gPos $ position p
-                                                                              ORANGE -> updateGposAstar gstate gPos $ position o
-                                                                              CYAN -> updateGposAstar gstate gPos $ position c
-                                                                    in 
-                                                                if gPos == newPos then (Ghost gPos color Idle t s ) else (Ghost newPos color gState t s )
-
-updateGhostByState::GameState->Player ->Player
+-- update the players with the state Chase Scatter, ToScatterPlace and Idle
+updateGhostByState::GameState -> Player -> Player
 updateGhostByState gstate g@(Ghost gPos RED gState _ _ )  = getRedGhost g gstate
 updateGhostByState gstate g@(Ghost gPos PINK gState _ _ ) = getPinkGhost g gstate
 updateGhostByState gstate g@(Ghost gPos ORANGE gState _ _ ) = getOrangeGhost g gstate
 updateGhostByState gstate g@(Ghost gPos CYAN gState _ _ ) = getCyanGhost g gstate
 updateGhostByState gstate ghost = ghost
+
+-- Let the ghost walk to the return base. Switch state to Idle if destination has been reached
+updateGhostByRetreat :: GameState -> Player -> Player
+updateGhostByRetreat gstate g@(Ghost gPos color gState t s ) = 
+  let (r:o:p:c:xs) = map position (ghosts runningGameState)  -- get the begin position of all different color ghosts
+      newPos = case color of
+                RED -> updateGposAstar gstate gPos r
+                PINK -> updateGposAstar gstate gPos  p
+                ORANGE -> updateGposAstar gstate gPos  o
+                CYAN -> updateGposAstar gstate gPos  c  in 
+  if gPos == newPos then (Ghost gPos color Idle t s ) else (Ghost newPos color gState t s )
 
 
 flipGhostStateHunt::GameState -> Player->Player
@@ -61,11 +65,11 @@ flipGhostStateHunt gstate g@(Ghost gPos gColor (Scatter _) timestamp sequenc) = 
 flipGhostStateHunt gstate ghost = ghost
 
 
-updateGhostByFrightened::Player->GameState->Player
-updateGhostByFrightened (Ghost gPos gColor Frightened timestamp sequenc) gstate
+updateGhostByFrightened:: GameState -> Player ->Player
+updateGhostByFrightened gstate (Ghost gPos gColor Frightened timestamp sequenc) 
     | (time gstate) >= (timestamp) = setGhostToState Chase (time gstate) (Ghost gPos gColor Frightened timestamp sequenc)
     | otherwise = pickNewRandomPosition (Ghost gPos gColor Frightened timestamp sequenc) gstate
-updateGhostByFrightened ghost gstate  = ghost
+updateGhostByFrightened gstate ghost = ghost
 
 rng :: Int -> IO Int
 rng upper = randomRIO (0,upper-1)
@@ -83,39 +87,35 @@ pickNewRandomPosition (Ghost gPos gColor Frightened timestamp sequenc) gstate = 
     amountOfOptions = length newPosOptions
     newPos = unsafePerformIO $ randomElementFromList newPosOptions
 
-
+-- update the position with one step into the shortest path to the destination
 updateGposAstar :: GameState -> (Int, Int) -> (Int, Int) -> (Int, Int)
 updateGposAstar gstate start end = case findPath gstate start end of
                                     Just (steps, (x : xs)) -> x
                                     _ -> start
 
+-- calculates the new position of the route the scatter ghosts need to take
 nextPosScatter::GameState -> (Int, Int) -> (Int, Int) -> ((Int, Int), GhostState)
 nextPosScatter gstate start des = let new_pos = updateGposAstar gstate start des in
                                       case new_pos == start of
-                                      True -> (start, (Scatter []))
-                                      _    -> (new_pos, ToScatterPlace)
-
-getTotalRoute::Player -> [Direction]
-getTotalRoute (Ghost _ ORANGE _ _ _ ) = [RIGHT, RIGHT, UP, LEFT, UP, LEFT, DOWN, LEFT, DOWN]
-getTotalRoute (Ghost _ CYAN _ _ _ ) = [LEFT, LEFT, UP, RIGHT, UP, RIGHT, DOWN, RIGHT, DOWN]
-getTotalRoute (Ghost _ PINK _ _ _ ) = [DOWN, DOWN, RIGHT, UP, LEFT]
-getTotalRoute (Ghost _ RED _ _ _ ) = [DOWN, DOWN, LEFT, UP, RIGHT]
+                                        True -> (start, (Scatter []))
+                                        _    -> (new_pos, ToScatterPlace)
 
 
 getNewDirPos:: Player -> GameState -> ((Int,Int), [Direction])
-getNewDirPos ghost@(Ghost gPos gColor (Scatter route) _ _) gstate = case route of
-                                                                      (x:y:xs) -> let new_pos = calculateNextPosition gPos y in
-                                                                                    case positionWalkable new_pos gstate of
-                                                                                      True -> (new_pos, y:xs)
-                                                                                      False -> let new_pos1 = calculateNextPosition gPos x in
-                                                                                        case positionWalkable new_pos1 gstate of
-                                                                                          True -> (new_pos1, x:y:xs)
-                                                                                          _    -> (gPos, (x:y:xs) )
-                                                                      [x] -> let new_pos = calculateNextPosition gPos x in
-                                                                                    case positionWalkable new_pos gstate of
-                                                                                      True -> (new_pos, [x])
-                                                                                      _    -> (gPos, getTotalRoute ghost)
-                                                                      _   -> (gPos, getTotalRoute ghost)
+getNewDirPos ghost@(Ghost gPos gColor (Scatter route) _ _) gstate = 
+  case route of
+    (x:y:xs) -> let new_pos = calculateNextPosition gPos y in
+                  case positionWalkable new_pos gstate of
+                    True -> (new_pos, y:xs)
+                    False -> let new_pos1 = calculateNextPosition gPos x in
+                              case positionWalkable new_pos1 gstate of
+                                True -> (new_pos1, x:y:xs)
+                                _    -> (gPos, (x:y:xs) )
+    [x]      -> let new_pos = calculateNextPosition gPos x in
+                  case positionWalkable new_pos gstate of
+                    True -> (new_pos, [x])
+                    _    -> (gPos, getTotalRoute ghost)
+    _        -> (gPos, getTotalRoute ghost)
 
 updateIdleGhost:: Player -> GameState -> Int -> Player
 updateIdleGhost ghost@(Ghost gPos gColor Idle timestamp sequence) gstate minCoins =
