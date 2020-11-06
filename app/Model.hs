@@ -12,7 +12,6 @@ data GameState = GameState
     player           :: Player,
     world            :: World,
     ghosts           :: Ghosts,
-    pause            :: Bool,
     consumablesLeft  :: Int,
     consumablesTotal :: Int,
     time             :: Float,
@@ -31,7 +30,6 @@ runningGameState = GameState
           Ghost (16, 14) CYAN   Idle 0.0 0 UP
         ],
       world = getDefaultWorld,
-      pause = False,
       consumablesTotal = countAmountOfDots getDefaultWorld,
       consumablesLeft = countAmountOfDots getDefaultWorld,
       time=0.0,
@@ -47,13 +45,14 @@ initialGameState = GameState
           [
           ],
         world = [],
-        pause = False,
         consumablesTotal = 0,
         consumablesLeft =  0,
         time=0.0,
         animationTime = 0,
         animationInterval=1
       }
+
+
 
 
 type GhostBehaviour = (Int, GhostState)
@@ -63,7 +62,19 @@ getTimeOutTime 1 = 100000000000
 getTimeOutTime sequenceId = [7, 20, 7, 20, 5, 20, 5, maxBound-100000] !! sequenceId
 
 
-data RunningState = START | RUNNING | WON | LOST deriving (Show, Eq)
+data RunningState = START | RUNNING | WON | LOST | PAUSE deriving (Show, Eq)
+
+isPlayState::GameState->Bool
+isPlayState gstate | (isPaused gstate) = True
+                   | RUNNING == runningState gstate = True 
+                   | otherwise= False
+
+isPaused::GameState->Bool
+isPaused gstate =  PAUSE == runningState gstate
+
+flipPause::GameState->GameState
+flipPause gstate | isPaused gstate = gstate {runningState=RUNNING}
+                 | otherwise = gstate{runningState=PAUSE}
 
 
 data Player
