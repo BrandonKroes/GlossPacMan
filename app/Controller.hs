@@ -19,8 +19,8 @@ update currentFT gstate
   | runningState gstate /= RUNNING = return gstate
   | otherwise = return (conditions
       $ updateWorld
-      $ updateGhosts
       $ updatePlayer
+      $ updateGhosts
       $ updateFrameTime gstate currentFT )
 
 inputHandler :: Event -> GameState -> IO GameState

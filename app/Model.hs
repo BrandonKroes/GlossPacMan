@@ -21,6 +21,8 @@ import Graphics.Gloss
 import GHC.Generics
 
 
+type Assets = Map String Picture
+
 data GameState = GameState
   { runningState     :: RunningState,
     player           :: Player,
@@ -32,7 +34,7 @@ data GameState = GameState
     time             :: Float,
     animationTime    :: Float,
     animationInterval:: Int,
-    walls           :: Map String Picture
+    walls           :: Assets
   }
 
 runningGameState :: GameState
@@ -51,7 +53,8 @@ runningGameState = GameState
       consumablesLeft = countAmountOfDots getDefaultWorld,
       time=0.0,
       animationTime = 0,
-      animationInterval=1
+      animationInterval=1,
+      walls = undefined
     }
 
 switchToRunningState::GameState -> GameState
@@ -61,8 +64,8 @@ switchToRunningState baseState = adjustedState
     adjustedState = newState {walls = (walls baseState)}
 
 
-initialGameState :: Map String Picture -> GameState
-initialGameState p = GameState
+initialGameState :: Assets -> GameState
+initialGameState assets = GameState
       { runningState = START,
         player = PacMan (14, 23) 0 (UP, NOTHING),
         ghosts =
@@ -75,7 +78,7 @@ initialGameState p = GameState
         time=0.0,
         animationTime = 0,
         animationInterval=1,
-        walls = p
+        walls = assets
       }
 
 
