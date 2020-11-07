@@ -9,17 +9,18 @@ import Constants
 import Model
 
 -- Updating the ghost
-updateGhosts :: GameState -> GameState
-updateGhosts gstate = gstate {ghosts = newGhostlist}
-  where newGhostlist = map (updateGhost gstate) (ghosts gstate)
+updateGhosts :: GameState -> IO GameState
+updateGhosts gstate = do 
+                      newGhostlist <- mapM (updateGhost gstate) (ghosts gstate)
+                      return (gstate {ghosts = newGhostlist})
 
-updateGhost :: GameState -> Player -> Player
+updateGhost :: GameState -> Player -> IO Player
 updateGhost gstate g@(Ghost _ _ Frightened _ _ _) = updateGhostByFrightened gstate g
-updateGhost gstate g@(Ghost _ _ Retreat _ _ _) = updateGhostByRetreat gstate g 
-updateGhost gstate g@(Ghost _ _ Idle _ _ _) = updateGhostByIdle gstate g           -- This one needs to be made explicitly clear
+updateGhost gstate g@(Ghost _ _ Retreat _ _ _) = return (updateGhostByRetreat gstate g) 
+updateGhost gstate g@(Ghost _ _ Idle _ _ _) = return (updateGhostByIdle gstate g)           -- This one needs to be made explicitly clear
 updateGhost gstate g@(Ghost _ _ _ timestamp _ _ )
-            | (time gstate) >= (timestamp) = flipGhostStateHunt gstate g
-            | otherwise = updateGhost2 gstate g
+            | (time gstate) >= (timestamp) = return (flipGhostStateHunt gstate g)
+            | otherwise = return (updateGhost2 gstate g)
 
 -- update the players with the state Chase Scatter, ToScatterPlace and Idle. since at updateGhost first needed to be checked if the timing condition was true, the next part of pattermatching is here
 updateGhost2::GameState -> Player -> Player
@@ -98,11 +99,11 @@ flipGhostStateHunt gstate g@(Ghost gPos gColor (Scatter _) timestamp sequenc dir
 flipGhostStateHunt gstate ghost = ghost
 
 
-updateGhostByFrightened:: GameState -> Player -> Player
+updateGhostByFrightened:: GameState -> Player -> IO Player
 updateGhostByFrightened gstate ghost@(Ghost _ _ Frightened timestamp _ _) 
-    | (time gstate) >= (timestamp) = setGhostToState Chase (time gstate) ghost
+    | (time gstate) >= (timestamp) = return (setGhostToState Chase (time gstate) ghost)
     | otherwise = updateRandomPos gstate ghost
-updateGhostByFrightened gstate ghost = ghost
+updateGhostByFrightened gstate ghost = return ghost
 
 rng :: Int -> IO Int
 rng upper = randomRIO (0,upper-1)
@@ -112,12 +113,14 @@ randomElementFromList list = do
   r <- rng (length list)
   return $ list !! r
 
-updateRandomPos :: GameState -> Player -> Player
+updateRandomPos :: GameState -> Player -> IO Player
 updateRandomPos gstate g@(Ghost curr _ _ _ _ direction) = 
   let new_pos = calculateNextPosition curr direction in
     case positionWalkable new_pos gstate of
-      True -> g{position = new_pos}
-      _    -> let newDir = unsafePerformIO $ randomElementFromList [ x | x <- [UP, DOWN, RIGHT, LEFT], x /= direction ] in g{gDirection = newDir}
+      True -> return g{position = new_pos}
+      _    -> do 
+                newDir <- randomElementFromList [ x | x <- [UP, DOWN, RIGHT, LEFT], x /= direction ] 
+                return g{gDirection = newDir}
 
 
 pickNewRandomPosition :: Player -> GameState -> Player
