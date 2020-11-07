@@ -9,11 +9,12 @@ import Graphics.Gloss.Interface.IO.Game
 
 
 -- Render override can decide to throw away all the pics.
--- Future optimisation would prevent generation of pictures, but currently it will only prevent rendering.
+-- Purposefully not using pattern matching, because it would cause 5 gigantic lines to adjust each time the code base changes
 renderOverride::GameState -> [Picture] -> [Picture]
 renderOverride gstate frames | LOST == (runningState gstate) = getLostText gstate
                              | WON  == (runningState gstate) = getWonText
                              | START == (runningState gstate) = getStartText
+                             | PAUSE == (runningState gstate) = getPauseText
                              | otherwise = frames
 
 getLostText::GameState->[Picture]
@@ -23,6 +24,13 @@ getLostText gstate = [(translatePicture(-100, 0  ) (color green (text "YOU LOSE"
               (translatePicture (-100, 350) (color red   (text "PRESS ANY"))),
               (translatePicture (-100, 470) (color red   (text " KEY TO"))),
               (translatePicture (-100, 590) (color red   (text "TRY AGAIN")))]
+
+
+getPauseText::[Picture]
+getPauseText = [(translatePicture (-100, 0) (color green (text "PAUSED"))),
+              (translatePicture (-100, 350) (color blue (text "PRESS 'P'"))),
+              (translatePicture (-100, 470) (color blue (text " TO"))),
+              (translatePicture (-100, 590) (color blue (text "CONTINUE")))]
 
 getWonText::[Picture]
 getWonText = [(translatePicture (-100, 0) (color green (text "YOU WIN"))),

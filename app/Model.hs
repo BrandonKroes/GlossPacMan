@@ -28,7 +28,6 @@ data GameState = GameState
     player           :: Player,
     world            :: World,
     ghosts           :: Ghosts,
-    pause            :: Bool,
     consumablesLeft  :: Int,
     consumablesTotal :: Int,
     time             :: Float,
@@ -48,7 +47,6 @@ runningGameState = GameState
           Ghost (16, 14) CYAN   Idle 0.0 0 UP
         ],
       world = getDefaultWorld,
-      pause = False,
       consumablesTotal = countAmountOfDots getDefaultWorld,
       consumablesLeft = countAmountOfDots getDefaultWorld,
       time=0.0,
@@ -72,7 +70,6 @@ initialGameState assets = GameState
           [
           ],
         world = [],
-        pause = False,
         consumablesTotal = 0,
         consumablesLeft =  0,
         time=0.0,
@@ -82,6 +79,8 @@ initialGameState assets = GameState
       }
 
 
+
+
 type GhostBehaviour = (Int, GhostState)
 
 getTimeOutTime::Int->Int
@@ -89,7 +88,19 @@ getTimeOutTime 1 = 100000000000
 getTimeOutTime sequenceId = [7, 20, 7, 20, 5, 20, 5, maxBound-100000] !! sequenceId
 
 
-data RunningState = START | RUNNING | WON | LOST deriving (Show, Eq)
+data RunningState = START | RUNNING | WON | LOST | PAUSE deriving (Show, Eq)
+
+isPlayState::GameState->Bool
+isPlayState gstate | (isPaused gstate) = True
+                   | RUNNING == runningState gstate = True 
+                   | otherwise= False
+
+isPaused::GameState->Bool
+isPaused gstate =  PAUSE == runningState gstate
+
+flipPause::GameState->GameState
+flipPause gstate | isPaused gstate = gstate {runningState=RUNNING}
+                 | otherwise = gstate{runningState=PAUSE}
 
 
 data Player
@@ -190,10 +201,20 @@ data Direction =  UP   | DOWN  | LEFT       | RIGHT      | NOTHING deriving (Sho
 data GhostState = Idle | Chase | Retreat    | Frightened | Scatter [Direction] | ToScatterPlace deriving (Show, Eq)
 
 setGhostsToState::GhostState->[Player]->Float->[Player]
-setGhostsToState ghostState ghosts time = map (setGhostToState ghostState time) ghosts
+setGhostsToState ghostState ghosts time = nGhosts
+  where
+    nonApplicableGhosts = filter (\g -> not (ghostTransitionAllowed ghostState (state g))) ghosts
+    adjustableGhosts = filter (\g -> ghostTransitionAllowed ghostState (state g)) ghosts
+    applicableGhosts  =   map (setGhostToState ghostState time) adjustableGhosts
+    nGhosts = applicableGhosts ++ nonApplicableGhosts
 
 setGhostToState::GhostState->Float->Player->Player
 setGhostToState nState time = \g -> g {state=nState, timestamp=time}
+
+
+ghostTransitionAllowed::GhostState->GhostState->Bool
+ghostTransitionAllowed Frightened Idle = False
+ghostTransitionAllowed _  _ = True
 
 
 isNonLethal::Player->Bool

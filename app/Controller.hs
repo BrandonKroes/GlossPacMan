@@ -14,8 +14,6 @@ import Model
 update :: Float -> GameState -> IO GameState
 update currentFT gstate
   -- check if the game is paused
-  -- TODO: Find out if YODA conditions are considered good practice in Haskell.
-  | pause gstate = return gstate
   | runningState gstate /= RUNNING = return gstate
   | otherwise = return (conditions
       $ updateWorld
@@ -33,16 +31,17 @@ inputHandler event gstate
 
 runningInputHandler::Event -> GameState -> GameState
 runningInputHandler event gstate
-    | not (pause gstate) = case event of
+    | not (isPaused gstate) = case event of
                            EventKey (Char 'w') Down _ _ -> setPlayerDirection UP gstate
                            EventKey (Char 's') Down _ _ -> setPlayerDirection DOWN gstate
                            EventKey (Char 'a') Down _ _ -> setPlayerDirection LEFT gstate
                            EventKey (Char 'd') Down _ _ -> setPlayerDirection RIGHT gstate
-                           EventKey (Char 'p') Down _ _ -> gstate {pause = not $ pause gstate}
+                           EventKey (Char 'p') Down _ _ -> flipPause gstate
                            _ -> gstate
    | otherwise = case event of
-                 EventKey (Char 'p') Down _ _ -> gstate {pause = not $ pause gstate}
+                 EventKey (Char 'p') Down _ _ -> flipPause gstate
                  _ -> gstate
+
 
 
 -- The quit buttons stores the current game state
