@@ -40,9 +40,3 @@ runningInputHandler event gstate
                  EventKey (Char 'p') Down _ _ -> flipPause gstate
                  _ -> gstate
 
-
-<<<<<<< HEAD
-
--- The quit buttons stores the current game state
-=======
->>>>>>> feature/highscoreIO
