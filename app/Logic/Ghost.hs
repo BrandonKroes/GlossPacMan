@@ -124,7 +124,7 @@ updateRandomPos gstate g@(Ghost curr _ _ _ _ direction) =
 
 
 pickNewRandomPosition :: Player -> GameState -> Player
-pickNewRandomPosition (Ghost gPos gColor Frightened timestamp sequenc direction) gstate = (Ghost newPos gColor Frightened timestamp sequenc direction)
+pickNewRandomPosition g@(Ghost gPos gColor Frightened timestamp sequenc direction) gstate = g{position = newPos}
   where
     newPosOptions = (getWalkableNeighborTilePositions gstate gPos) ++ [gPos]
     amountOfOptions = length newPosOptions

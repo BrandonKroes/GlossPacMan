@@ -42,4 +42,3 @@ runningInputHandler event gstate
                  _ -> gstate
 
 
--- The quit buttons stores the current game state
