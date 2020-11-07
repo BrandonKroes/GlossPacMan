@@ -49,4 +49,5 @@ getScoreText::Picture
 getScoreText = scale 0.15 0.15 $ color white (text "Score: ")
 
 getScore::GameState->Picture
-getScore gstate = scale 0.15 0.15 $ color white (text (show $ ((consumablesTotal gstate) - (consumablesLeft gstate)) * 100))
+getScore gstate = scale 0.15 0.15 $ color white (text (show currScore ))
+  where currScore = (((consumablesTotal gstate) - (consumablesLeft gstate)) * 100) + (score (player gstate))
