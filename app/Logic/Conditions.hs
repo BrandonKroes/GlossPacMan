@@ -1,6 +1,7 @@
 module Logic.Conditions where
 
 import Data.List
+import System.IO.Strict
 import Model
 -- Conditions takes care of deciding when the game ends & conditional logic that requires all gamestate variables set
 
@@ -33,7 +34,7 @@ readToFloat (x:xs:[]) = (x ::Float) : (xs ::Float) : []
 
 updateHighscore :: GameState -> FilePath -> IO()
 updateHighscore gstate fileName = do 
-                                  highscoreStr <- readFile fileName 
+                                  highscoreStr <- System.IO.Strict.readFile fileName 
                                   let score1 = fromIntegral  (score (player gstate))
                                       time1  = time gstate
                                       lscores = lines highscoreStr
