@@ -2,6 +2,11 @@ module Render.Util where
 
 import Model
 
+import qualified Data.Map.Strict as Map
+
+import Data.Maybe
+
+
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
 
@@ -22,3 +27,6 @@ translatePictureByBoundary (x, y) pic = translatePicture (x * 31, y * 31) pic
 translatePictureByTile :: Tile -> Picture -> Picture
 translatePictureByTile (NotWalkable _ p) picture = translatePictureByBoundary p picture
 translatePictureByTile (Walkable f p) picture = translatePictureByBoundary p picture
+
+getTextureByString::GameState->String->Picture
+getTextureByString gstate textureString = fromJust $ Map.lookup textureString (walls gstate)

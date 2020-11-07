@@ -7,8 +7,8 @@ import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
 
 
-renderStats::GameState -> IO [Picture]
-renderStats gstate = return[(translate (290) (475) (getConsumablesLeft gstate)),
+renderStats::GameState -> [Picture]
+renderStats gstate = [(translate (290) (475) (getConsumablesLeft gstate)),
                       (translate (190) (475) (getConsumablesText)),
                       (translate (-90) (475) (getScore gstate)),
                       (translate (-170) (475) (getScoreText)),
@@ -17,22 +17,22 @@ renderStats gstate = return[(translate (290) (475) (getConsumablesLeft gstate)),
                       ]
 
 getTimeSeconds::Float->String
-getTimeSeconds sec = show (sec) -- | len > 1 = secs | otherwise = secsappend
-      -- where
-        -- secs = getSec sec
-        -- len = length secs
-        -- secsappend = "0" ++ secs
+getTimeSeconds sec | len > 1 = secs | otherwise = secsappend
+      where
+        secs = getSec sec
+        len = length secs
+        secsappend = "0" ++ secs
 
 
 getSec::Float -> String
-getSec sec = show $ sec -- ((round sec) `mod` 60::Int)
+getSec sec = show $ ((round sec) `mod` 60::Int)
 
 
 getTimeMinutes::Float->String
-getTimeMinutes minutes = show $  minutes --((round minutes) `quot` 60::Int)
+getTimeMinutes minutes = show $ ((round minutes) `quot` 60::Int)
 
 getTime::GameState->Picture
-getTime gstate = scale 0.15 0.15 $ color white (text (getSec (time gstate)))
+getTime gstate = scale 0.15 0.15 $ color white (text (getTimeMinutes (time gstate) ++ ":" ++ getTimeSeconds (time gstate) ))
 
 getTimeLabel::Picture
 getTimeLabel = scale 0.15 0.15 $ color white (text "Time: ")

@@ -13,8 +13,4 @@ import Render.World
 import Render.Stats
 
 render :: GameState -> IO Picture
-render g = do 
-            rp <- renderPlayers g
-            rw <- renderWorld g
-            rs <- renderStats g 
-            return (pictures $ renderOverride g $ rs ++ rw ++ rp)
+render g = return (pictures $ renderOverride g $ renderStats g ++ renderWorld g ++ renderPlayers g)

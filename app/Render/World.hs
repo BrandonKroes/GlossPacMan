@@ -9,31 +9,22 @@ import AssetManager
 
 
 
-renderWorld :: GameState -> IO [Picture]
+renderWorld :: GameState -> [Picture]
 renderWorld game = parseWorld game $ world game
 
-parseWorld :: GameState -> World -> IO [Picture]
-parseWorld gstate w = mapM (parseTile gstate) w
+parseWorld :: GameState -> World -> [Picture]
+parseWorld gstate w = map (parseTile gstate) w
 
-parseTile :: GameState -> Tile -> IO Picture
-parseTile gstate t = do
-                        ttp <- (tileToPicture gstate t)
-                        return (translatePictureByTile t ttp)
+parseTile :: GameState -> Tile -> Picture
+parseTile gstate t = (translatePictureByTile t (tileToPicture gstate t))
 
 
-tileToPicture ::GameState -> Tile -> IO Picture
+tileToPicture ::GameState -> Tile -> Picture
 tileToPicture gstate (NotWalkable wallType (x, y))
-  | wallType == VERTICAL = do p <- (walls gstate) !! 1
-                              return (translatePicture (x, y) p)
-  | wallType == HORIZONTAL = do p <- (walls gstate) !! 2
-                                return (translatePicture (x, y) p)
+  | wallType == VERTICAL = translatePicture (x, y) (getTextureByString gstate "vWall")
+  | wallType == HORIZONTAL = translatePicture (x, y) (getTextureByString gstate "hWall")
 tileToPicture gstate (Walkable field (x, y))
-  | field == Coin = do p <- (walls gstate) !! 4
-                       return (translatePicture (x, y) p)
-  -- TODO: figure out why we had this field | field==Bonus =
-  | field == Empty = do p <- (walls gstate) !! 3
-                        return (translatePicture (x, y) p)
-  | field == Dot = do p <- (walls gstate) !! 5
-                      return (translatePicture (x, y) p)
-  | field == DOOR = do p <- (walls gstate) !! 0
-                       return (translatePicture (x, y) p)
+  | field == Coin = translatePicture (x, y) (getTextureByString gstate "coin")
+  | field == Empty = translatePicture (x, y) (getTextureByString gstate "empty")
+  | field == Dot = translatePicture (x, y) (getTextureByString gstate "dot")
+  | field == DOOR = translatePicture (x, y) (getTextureByString gstate "door")

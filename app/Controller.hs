@@ -26,8 +26,8 @@ update currentFT gstate
 inputHandler :: Event -> GameState -> IO GameState
 inputHandler event gstate
   | (runningState gstate) /= RUNNING = case event of
-                                        EventKey (SpecialKey _) Down _ _ -> return runningGameState
-                                        EventKey (Char _) Down _ _ -> return runningGameState
+                                        EventKey (SpecialKey _) Down _ _ -> return (switchToRunningState gstate)
+                                        EventKey (Char _) Down _ _ -> return (switchToRunningState gstate)
                                         _ -> return gstate
   | otherwise = return (runningInputHandler event gstate)
 

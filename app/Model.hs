@@ -21,17 +21,6 @@ import Graphics.Gloss
 import GHC.Generics
 
 
-getdDataFN :: FilePath -> IO FilePath
-getdDataFN name = do
-  dir <- getDataDir
-  return (dir ++ "\\app\\assets\\" ++ name)
-
-ppngByFile::FilePath -> IO Picture
-ppngByFile p = do
-                fp <- getdDataFN p
-                lj <- loadJuicyPNG fp
-                return (fromJust lj)
-
 data GameState = GameState
   { runningState     :: RunningState,
     player           :: Player,
@@ -43,7 +32,7 @@ data GameState = GameState
     time             :: Float,
     animationTime    :: Float,
     animationInterval:: Int,
-    walls           :: [IO Picture]
+    walls           :: Map String Picture
   }
 
 runningGameState :: GameState
@@ -65,8 +54,15 @@ runningGameState = GameState
       animationInterval=1
     }
 
-initialGameState :: GameState
-initialGameState = GameState
+switchToRunningState::GameState -> GameState
+switchToRunningState baseState = adjustedState
+  where
+    newState = runningGameState
+    adjustedState = newState {walls = (walls baseState)}
+
+
+initialGameState :: Map String Picture -> GameState
+initialGameState p = GameState
       { runningState = START,
         player = PacMan (14, 23) 0 (UP, NOTHING),
         ghosts =
@@ -79,12 +75,7 @@ initialGameState = GameState
         time=0.0,
         animationTime = 0,
         animationInterval=1,
-        walls = [(ppngByFile "door.png"),
-        ppngByFile "vertical.png",
-        ppngByFile "horizontal.png",
-        ppngByFile "empty.png",
-        ppngByFile "coin.png",
-        ppngByFile "dot.png"]
+        walls = p
       }
 
 
@@ -147,7 +138,7 @@ isCoin::Tile->Bool
 isCoin (Walkable field _) = field == Coin
 isCoin _ = False
 
-data Field = Coin | Bonus | Empty | Dot | DOOR deriving (Show, Eq)
+data Field = Coin | Empty | Dot | DOOR deriving (Show, Eq)
 
 type World = [Tile]
 

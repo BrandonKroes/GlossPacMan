@@ -6,7 +6,7 @@ updateFrameTime::GameState -> Float -> GameState
 updateFrameTime gstate deltaTime= updateAnimationInterval $  updateAnimationTime deltaTime $ updateGameTime gstate deltaTime
 
 updateGameTime::GameState -> Float -> GameState
-updateGameTime gstate deltaTime= gstate {time = deltaTime}
+updateGameTime gstate deltaTime= gstate {time = deltaTime+ (time gstate)}
 
 
 flipVal::Int -> Int
