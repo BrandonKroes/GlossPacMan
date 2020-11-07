@@ -6,7 +6,7 @@ module Constants where
 --multiplyToSeconds::Float->Float
 
 fps::Int
-fps = 10
+fps = 60
 
 frightTime::Float
 frightTime = 10

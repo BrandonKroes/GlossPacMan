@@ -1,11 +1,36 @@
 {-# LANGUAGE OverloadedStrings, DeriveGeneric, DeriveAnyClass, StandaloneDeriving #-}
 module Model where
 
+
+
+import Paths_pacman
+import Graphics.Gloss.Juicy
+
+
+
 import Constants
 import Data.List
 import Data.Maybe
 import Data.Aeson (ToJSON)
+import Data.Map (Map)
+import qualified Data.Map as Map
+
+import Graphics.Gloss
+
+
 import GHC.Generics
+
+
+getdDataFN :: FilePath -> IO FilePath
+getdDataFN name = do
+  dir <- getDataDir
+  return (dir ++ "\\app\\assets\\" ++ name)
+
+ppngByFile::FilePath -> IO Picture
+ppngByFile p = do
+                fp <- getdDataFN p
+                lj <- loadJuicyPNG fp
+                return (fromJust lj)
 
 data GameState = GameState
   { runningState     :: RunningState,
@@ -17,7 +42,8 @@ data GameState = GameState
     consumablesTotal :: Int,
     time             :: Float,
     animationTime    :: Float,
-    animationInterval:: Int
+    animationInterval:: Int,
+    walls           :: [IO Picture]
   }
 
 runningGameState :: GameState
@@ -52,7 +78,13 @@ initialGameState = GameState
         consumablesLeft =  0,
         time=0.0,
         animationTime = 0,
-        animationInterval=1
+        animationInterval=1,
+        walls = [(ppngByFile "door.png"),
+        ppngByFile "vertical.png",
+        ppngByFile "horizontal.png",
+        ppngByFile "empty.png",
+        ppngByFile "coin.png",
+        ppngByFile "dot.png"]
       }
 
 
@@ -99,7 +131,7 @@ isWalkable (Walkable _ _) = True
 isWalkable _ = False
 
 isDot::Tile->Bool
-isDot (Walkable field _) = field == Dot || field == Coin 
+isDot (Walkable field _) = field == Dot || field == Coin
 isDot _ = False
 
 -- Only the Walkable tiles have the field so no pm is required.
