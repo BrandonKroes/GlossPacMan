@@ -74,6 +74,7 @@ executable pacman-exe
     , strict
     , data-fix
     , aeson
+    , containers
   default-language: Haskell2010
 
 test-suite pacman-test

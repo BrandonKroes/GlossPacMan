@@ -44,6 +44,7 @@ extra-deps:
   - strict-0.4
   - data-fix-0.3.0
   - aeson-1.5.4.1
+  - containers-0.6.2.1
 
 # - acme-missiles-0.3
 # - git: https://github.com/commercialhaskell/stack.git
