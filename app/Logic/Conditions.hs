@@ -32,19 +32,25 @@ placeScoreInList (score, time) (x@(s:t:rs):xs) | score < s = x : placeScoreInLis
 
 readToFloat (x:xs:[]) = (x ::Float) : (xs ::Float) : []
 
+zip_ _      []    = []
+zip_ []     ys    = ys
+zip_ (x:xs) (y:ys) = (x:y) : zip_ xs ys
+
 updateHighscore :: GameState -> FilePath -> IO()
 updateHighscore gstate fileName = do 
                                   highscoreStr <- System.IO.Strict.readFile fileName 
-                                  let score1 = fromIntegral  (score (player gstate))
-                                      time1  = time gstate
-                                      lscores = lines highscoreStr
-                                      llscore = map words lscores
+                                  let score0 = fromIntegral  (score (player gstate)) -- get raw score
+                                      score1 = (fromInteger $ round $ score0 * (10^2)) / (10.0^^2) -- round to two decimals
+                                      time1 = (fromInteger $ round $ (time gstate) * (10^2)) / (10.0^^2) -- round to two decimals
+                                      (header : lscores) = if highscoreStr == [] then ["Nr \t\t Score \t Time"] else  lines highscoreStr -- put all lines in one listelement
+                                      llscore = map (drop 1) $ map words lscores --split string in list of strings and remove number
                                       rscore = map (map read) llscore 
                                       iscore = map readToFloat rscore
-                                      newList = placeScoreInList (score1,time1) iscore 
+                                      newList0 = placeScoreInList (score1,time1) iscore 
+                                      newList = zip_ [1..] newList0
                                       strList = map (map show) newList
-                                      newStr = unlines $ map (intercalate " ") strList
-                                  writeFile fileName newStr 
+                                      newStr = unlines $ map (intercalate "\t\t") strList
+                                  writeFile fileName (header ++ "\n" ++ newStr) 
 
 runningStateGhostOnPlayer::GameState->Ghosts->(Int, Int) -> IO RunningState
 runningStateGhostOnPlayer gstate g pp
