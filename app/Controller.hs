@@ -11,38 +11,34 @@ import Logic.Conditions
 import Model
 
 -- The execution order of the gamestate is import for change detection
-update :: Float -> GameState -> GameState
+update :: Float -> GameState -> IO GameState
 update currentFT gstate
   -- check if the game is paused
-  -- TODO: Find out if YODA conditions are considered good practice in Haskell.
-  | pause gstate = gstate
-  | runningState gstate /= RUNNING = gstate
-  | otherwise = conditions
-      $ updateWorld
-      $ updateGhosts
-      $ updatePlayer
-      $ updateFrameTime gstate currentFT
+  | runningState gstate /= RUNNING = return gstate
+  | otherwise = do c <- conditions $ updatePlayer $ updateFrameTime gstate currentFT
+                   uG <- updateGhosts c
+                   c2 <- conditions uG
+                   return (updateWorld $ c2)
 
-inputHandler :: Event -> GameState -> GameState
+
+inputHandler :: Event -> GameState -> IO GameState
 inputHandler event gstate
   | (runningState gstate) /= RUNNING = case event of
-                                        EventKey (SpecialKey _) Down _ _ -> runningGameState
-                                        EventKey (Char _) Down _ _ -> runningGameState
-                                        _ -> gstate
-  | otherwise = runningInputHandler event gstate
+                                        EventKey (SpecialKey _) Down _ _ -> return (switchToRunningState gstate)
+                                        EventKey (Char _) Down _ _ -> return (switchToRunningState gstate)
+                                        _ -> return gstate
+  | otherwise = return (runningInputHandler event gstate)
 
 runningInputHandler::Event -> GameState -> GameState
 runningInputHandler event gstate
-    | not (pause gstate) = case event of
+    | not (isPaused gstate) = case event of
                            EventKey (Char 'w') Down _ _ -> setPlayerDirection UP gstate
                            EventKey (Char 's') Down _ _ -> setPlayerDirection DOWN gstate
                            EventKey (Char 'a') Down _ _ -> setPlayerDirection LEFT gstate
                            EventKey (Char 'd') Down _ _ -> setPlayerDirection RIGHT gstate
-                           EventKey (Char 'p') Down _ _ -> gstate {pause = not $ pause gstate}
+                           EventKey (Char 'p') Down _ _ -> flipPause gstate
                            _ -> gstate
    | otherwise = case event of
-                 EventKey (Char 'p') Down _ _ -> gstate {pause = not $ pause gstate}
+                 EventKey (Char 'p') Down _ _ -> flipPause gstate
                  _ -> gstate
 
-
--- The quit buttons stores the current game state

@@ -1,10 +1,5 @@
 module Constants where
 
-
-
-
---multiplyToSeconds::Float->Float
-
 fps::Int
 fps = 10
 

@@ -10,21 +10,21 @@ import AssetManager
 
 
 renderWorld :: GameState -> [Picture]
-renderWorld game = parseWorld $ world game
+renderWorld game = parseWorld game $ world game
 
-parseWorld :: World -> [Picture]
-parseWorld w = map parseTile w
+parseWorld :: GameState -> World -> [Picture]
+parseWorld gstate w = map (parseTile gstate) w
 
-parseTile :: Tile -> Picture
-parseTile t = translatePictureByTile t $ tileToPicture t
+parseTile :: GameState -> Tile -> Picture
+parseTile gstate t = (translatePictureByTile t (tileToPicture gstate t))
 
-tileToPicture :: Tile -> Picture
-tileToPicture (NotWalkable wallType (x, y))
-  | wallType == VERTICAL = translatePicture (x, y) wVertical
-  | wallType == HORIZONTAL = translatePicture (x, y) wHorizontal
-tileToPicture (Walkable field (x, y))
-  | field == Coin = translatePicture (x, y) imgCoin
-  -- TODO: figure out why we had this field | field==Bonus =
-  | field == Empty = translatePicture (x, y) imgEmpty
-  | field == Dot = translatePicture (x, y) imgDot
-  | field == DOOR = translatePicture (x, y) imgDoor
+
+tileToPicture ::GameState -> Tile -> Picture
+tileToPicture gstate (NotWalkable wallType (x, y))
+  | wallType == VERTICAL = translatePicture (x, y) (getTextureByString gstate "vWall")
+  | wallType == HORIZONTAL = translatePicture (x, y) (getTextureByString gstate "hWall")
+tileToPicture gstate (Walkable field (x, y))
+  | field == Coin = translatePicture (x, y) (getTextureByString gstate "coin")
+  | field == Empty = translatePicture (x, y) (getTextureByString gstate "empty")
+  | field == Dot = translatePicture (x, y) (getTextureByString gstate "dot")
+  | field == DOOR = translatePicture (x, y) (getTextureByString gstate "door")

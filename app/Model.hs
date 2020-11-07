@@ -1,23 +1,39 @@
 {-# LANGUAGE OverloadedStrings, DeriveGeneric, DeriveAnyClass, StandaloneDeriving #-}
 module Model where
 
+
+
+import Paths_pacman
+import Graphics.Gloss.Juicy
+
+
+
 import Constants
 import Data.List
 import Data.Maybe
 import Data.Aeson (ToJSON)
+import Data.Map (Map)
+import qualified Data.Map as Map
+
+import Graphics.Gloss
+
+
 import GHC.Generics
+
+
+type Assets = Map String Picture
 
 data GameState = GameState
   { runningState     :: RunningState,
     player           :: Player,
     world            :: World,
     ghosts           :: Ghosts,
-    pause            :: Bool,
     consumablesLeft  :: Int,
     consumablesTotal :: Int,
     time             :: Float,
     animationTime    :: Float,
-    animationInterval:: Int
+    animationInterval:: Int,
+    walls           :: Assets
   }
 
 runningGameState :: GameState
@@ -31,29 +47,38 @@ runningGameState = GameState
           Ghost (16, 14) CYAN   Idle 0.0 0 UP
         ],
       world = getDefaultWorld,
-      pause = False,
       consumablesTotal = countAmountOfDots getDefaultWorld,
       consumablesLeft = countAmountOfDots getDefaultWorld,
       time=0.0,
       animationTime = 0,
-      animationInterval=1
+      animationInterval=1,
+      walls = undefined
     }
 
-initialGameState :: GameState
-initialGameState = GameState
+switchToRunningState::GameState -> GameState
+switchToRunningState baseState = adjustedState
+  where
+    newState = runningGameState
+    adjustedState = newState {walls = (walls baseState)}
+
+
+initialGameState :: Assets -> GameState
+initialGameState assets = GameState
       { runningState = START,
         player = PacMan (14, 23) 0 (UP, NOTHING),
         ghosts =
           [
           ],
         world = [],
-        pause = False,
         consumablesTotal = 0,
         consumablesLeft =  0,
         time=0.0,
         animationTime = 0,
-        animationInterval=1
+        animationInterval=1,
+        walls = assets
       }
+
+
 
 
 type GhostBehaviour = (Int, GhostState)
@@ -63,7 +88,19 @@ getTimeOutTime 1 = 100000000000
 getTimeOutTime sequenceId = [7, 20, 7, 20, 5, 20, 5, maxBound-100000] !! sequenceId
 
 
-data RunningState = START | RUNNING | WON | LOST deriving (Show, Eq)
+data RunningState = START | RUNNING | WON | LOST | PAUSE deriving (Show, Eq)
+
+isPlayState::GameState->Bool
+isPlayState gstate | (isPaused gstate) = True
+                   | RUNNING == runningState gstate = True 
+                   | otherwise= False
+
+isPaused::GameState->Bool
+isPaused gstate =  PAUSE == runningState gstate
+
+flipPause::GameState->GameState
+flipPause gstate | isPaused gstate = gstate {runningState=RUNNING}
+                 | otherwise = gstate{runningState=PAUSE}
 
 
 data Player
@@ -99,7 +136,7 @@ isWalkable (Walkable _ _) = True
 isWalkable _ = False
 
 isDot::Tile->Bool
-isDot (Walkable field _) = field == Dot || field == Coin 
+isDot (Walkable field _) = field == Dot || field == Coin
 isDot _ = False
 
 -- Only the Walkable tiles have the field so no pm is required.
@@ -115,7 +152,7 @@ isCoin::Tile->Bool
 isCoin (Walkable field _) = field == Coin
 isCoin _ = False
 
-data Field = Coin | Bonus | Empty | Dot | DOOR deriving (Show, Eq)
+data Field = Coin | Empty | Dot | DOOR deriving (Show, Eq)
 
 type World = [Tile]
 
@@ -164,10 +201,20 @@ data Direction =  UP   | DOWN  | LEFT       | RIGHT      | NOTHING deriving (Sho
 data GhostState = Idle | Chase | Retreat    | Frightened | Scatter [Direction] | ToScatterPlace deriving (Show, Eq)
 
 setGhostsToState::GhostState->[Player]->Float->[Player]
-setGhostsToState ghostState ghosts time = map (setGhostToState ghostState time) ghosts
+setGhostsToState ghostState ghosts time = nGhosts
+  where
+    nonApplicableGhosts = filter (\g -> not (ghostTransitionAllowed ghostState (state g))) ghosts
+    adjustableGhosts = filter (\g -> ghostTransitionAllowed ghostState (state g)) ghosts
+    applicableGhosts  =   map (setGhostToState ghostState time) adjustableGhosts
+    nGhosts = applicableGhosts ++ nonApplicableGhosts
 
 setGhostToState::GhostState->Float->Player->Player
 setGhostToState nState time = \g -> g {state=nState, timestamp=time}
+
+
+ghostTransitionAllowed::GhostState->GhostState->Bool
+ghostTransitionAllowed Frightened Idle = False
+ghostTransitionAllowed _  _ = True
 
 
 isNonLethal::Player->Bool
