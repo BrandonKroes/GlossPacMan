@@ -44,12 +44,11 @@ updateHighscore gstate fileName = do
                                       time1 = (fromInteger $ round $ (time gstate) * (10^2)) / (10.0^^2) -- round to two decimals
                                       (header : lscores) = if highscoreStr == [] then ["Nr \t\t Score \t Time"] else  lines highscoreStr -- put all lines in one listelement
                                       llscore = map (drop 1) $ map words lscores --split string in list of strings and remove number
-                                      rscore = map (map read) llscore 
+                                      rscore = map (map read) llscore -- switch to Integer datatype
                                       iscore = map readToFloat rscore
                                       newList0 = placeScoreInList (score1,time1) iscore 
                                       newList = zip_ [1..] newList0
-                                      strList = map (map show) newList
-                                      newStr = unlines $ map (intercalate "\t\t") strList
+                                      newStr = unlines $ map (intercalate "\t\t") $ map (map show) newList
                                   writeFile fileName (header ++ "\n" ++ newStr) 
 
 runningStateGhostOnPlayer::GameState->Ghosts->(Int, Int) -> IO RunningState
