@@ -15,8 +15,10 @@ update :: Float -> GameState -> IO GameState
 update currentFT gstate
   -- check if the game is paused
   | runningState gstate /= RUNNING = return gstate
-  | otherwise = do uG <- updateGhosts $ updatePlayer $ updateFrameTime gstate currentFT
-                   conditions $ updateWorld $ uG
+  | otherwise = do c <- conditions $ updatePlayer $ updateFrameTime gstate currentFT
+                   uG <- updateGhosts c
+                   c2 <- conditions uG
+                   return (updateWorld $ c2)
 
 
 inputHandler :: Event -> GameState -> IO GameState
