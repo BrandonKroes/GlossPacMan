@@ -30,7 +30,7 @@ updatePlayerPosition gstate = p2
         p             = modifyPlayerPosition pos $ player gstate
         p2            = overrideDirection p newDir
 
--- * Getting the new possible position for a player
+-- * Getting the new possible position for a player. If the second direction can be walked, do this and discard the first direction
 getNewPlayerPosition :: GameState -> ((Int, Int), (Direction, Direction))
 getNewPlayerPosition gstate = let pos = position (player gstate) in
                                 case (direction (player gstate) ) of

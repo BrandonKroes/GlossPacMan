@@ -56,5 +56,3 @@ main = do
   -- The Gloss IO call to initialise the game.
   playIO window black fps (initialGameState assets) render inputHandler update
 
--- render -> rendering.hs
--- inputHandler en update -> controller

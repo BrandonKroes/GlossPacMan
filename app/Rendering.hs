@@ -11,5 +11,6 @@ import Render.Player
 import Render.World
 import Render.Stats
 
+-- Combines all renderings
 render :: GameState -> IO Picture
 render g = return (pictures $ renderOverride g $ renderStats g ++ renderWorld g ++ renderPlayers g)

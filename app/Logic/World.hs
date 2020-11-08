@@ -4,7 +4,7 @@ import Model
 import Constants
 
 
--- * m
+-- * Update the gamestate according to the gamestate and the interaction of player and the the tiles/coins
 updateWorld::GameState->GameState
 updateWorld gstate = detectingTilePlayerInteraction $ detectPlayerOnCoin gstate
 
