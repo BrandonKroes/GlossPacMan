@@ -1,11 +1,8 @@
 module Render.Player where
 
-import AssetManager
-
 import Model
 import Render.Util
 import Graphics.Gloss
-import Graphics.Gloss.Interface.IO.Game
 
 
 renderPlayers::GameState -> [Picture]

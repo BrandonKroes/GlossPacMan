@@ -33,9 +33,11 @@ data GameState = GameState
     time             :: Float,
     animationTime    :: Float,
     animationInterval:: Int,
-    walls           :: Assets
+    assets           :: Assets
   }
 
+-- * The default state for a running game.
+-- * the assets are intentionally left blank, because these will be inserted upon switching to the running state
 runningGameState :: GameState
 runningGameState = GameState
     { runningState = RUNNING,
@@ -52,18 +54,19 @@ runningGameState = GameState
       time=0.0,
       animationTime = 0,
       animationInterval=1,
-      walls = undefined
+      assets = undefined
     }
 
+-- * copying the available assets
 switchToRunningState::GameState -> GameState
 switchToRunningState baseState = adjustedState
   where
     newState = runningGameState
-    adjustedState = newState {walls = (walls baseState)}
+    adjustedState = newState {assets = (assets baseState)}
 
-
+-- * Default start of the game
 initialGameState :: Assets -> GameState
-initialGameState assets = GameState
+initialGameState textures = GameState
       { runningState = START,
         player = PacMan (14, 23) 0 (UP, NOTHING),
         ghosts =
@@ -75,7 +78,7 @@ initialGameState assets = GameState
         time=0.0,
         animationTime = 0,
         animationInterval=1,
-        walls = assets
+        assets = textures
       }
 
 
@@ -83,21 +86,19 @@ initialGameState assets = GameState
 
 type GhostBehaviour = (Int, GhostState)
 
-getTimeOutTime::Int->Int
-getTimeOutTime 1 = 100000000000
-getTimeOutTime sequenceId = [7, 20, 7, 20, 5, 20, 5, maxBound-100000] !! sequenceId
-
-
 data RunningState = START | RUNNING | WON | LOST | PAUSE deriving (Show, Eq)
 
+-- * Checking if the game is running
 isPlayState::GameState->Bool
 isPlayState gstate | (isPaused gstate) = True
-                   | RUNNING == runningState gstate = True 
+                   | RUNNING == runningState gstate = True
                    | otherwise= False
 
+-- * Checking if the game is in paused mode
 isPaused::GameState->Bool
 isPaused gstate =  PAUSE == runningState gstate
 
+-- * used to switch between running and pausing
 flipPause::GameState->GameState
 flipPause gstate | isPaused gstate = gstate {runningState=RUNNING}
                  | otherwise = gstate{runningState=PAUSE}
@@ -122,32 +123,41 @@ type Ghosts = [Player]
 
 data GhostColor = RED | ORANGE | PINK | CYAN deriving (Show, Eq)
 
+-- * Get the position of all the ghosts
 getGhostsPosition::Ghosts->[(Int, Int)]
 getGhostsPosition ghosts = map getPlayerPosition ghosts
 
+-- * Get the position of a player by player
 getPlayerPosition::Player->(Int, Int)
 getPlayerPosition player = position player
 
 -- Tile interactions
 data Tile = Walkable Field (Int, Int) | NotWalkable WallType (Int, Int)
 
+-- * Check if a tile is walkable
 isWalkable :: Tile -> Bool
 isWalkable (Walkable _ _) = True
 isWalkable _ = False
 
-isDot::Tile->Bool
-isDot (Walkable field _) = field == Dot || field == Coin
-isDot _ = False
 
 -- Only the Walkable tiles have the field so no pm is required.
 setTileField::Tile->Field-> Tile
 setTileField (Walkable field position) nField = Walkable nField position
 setTileField t _ = t
 
+
+-- * Check if a field is a coin or dot
 isConsumable::Tile->Bool
 isConsumable (Walkable field _) = field /= Empty && field /= DOOR
 isConsumable _ = False
 
+
+-- * Check if a field is a dot
+isDot::Tile->Bool
+isDot (Walkable field _) = field == Dot || field == Coin
+isDot _ = False
+
+-- * Check if a field is a coin
 isCoin::Tile->Bool
 isCoin (Walkable field _) = field == Coin
 isCoin _ = False
@@ -156,22 +166,27 @@ data Field = Coin | Empty | Dot | DOOR deriving (Show, Eq)
 
 type World = [Tile]
 
+-- * Count the amount of dots that are in the world
 countAmountOfDots::World->Int
 countAmountOfDots w = length $ filter (isDot) w
 
+-- * Acquiring a specific tile from the tiles list via position
 getTileByPosition::GameState -> (Int, Int)->Tile
 getTileByPosition gstate index = fromJust . find(isTile index) $ world gstate
 
+-- * Acquiring a specific tile index from the tiles list via position
 getTileIndexByPosition::GameState -> (Int, Int)->Int
 getTileIndexByPosition gstate index = fromJust . findIndex(isTile index) $ world gstate
 
-
+-- * Based on the tiles nearby, checking if they are walkable.
 getWalkableNeighborTilePositions::GameState->(Int, Int)->[(Int, Int)]
 getWalkableNeighborTilePositions gstate position = map getPositionFromTile $ getWalkableNeighborTile gstate position
 
+-- * individually checking if the tile is a walkable
 getWalkableNeighborTile::GameState->(Int,Int)->[Tile]
 getWalkableNeighborTile gstate position = filter (isWalkable) $ getNeighborTile gstate position
 
+-- * Get all the tiles that a player COULD go to based on the 4 directions that are possible.
 getNeighborTile::GameState->(Int, Int) -> [Tile]
 getNeighborTile gstate (x, y) =
   getSafeTile gstate (x-1, y) ++
@@ -179,7 +194,7 @@ getNeighborTile gstate (x, y) =
   getSafeTile gstate (x, y-1) ++
   getSafeTile gstate (x, y+1)
 
-
+-- * Preventing player instances from leaving the map
 getSafeTile::GameState->(Int, Int) -> [Tile]
 getSafeTile gstate (_, 29) = []
 getSafeTile gstate (27, _) = []
@@ -200,6 +215,8 @@ isTile checkPos (NotWalkable _ position) = checkPos == position
 data Direction =  UP   | DOWN  | LEFT       | RIGHT      | NOTHING deriving (Show, Eq)
 data GhostState = Idle | Chase | Retreat    | Frightened | Scatter [Direction] | ToScatterPlace deriving (Show, Eq)
 
+
+-- Bulk updating ghosts to a state and checking if you're allowed to do it.
 setGhostsToState::GhostState->[Player]->Float->[Player]
 setGhostsToState ghostState ghosts time = nGhosts
   where
@@ -208,44 +225,63 @@ setGhostsToState ghostState ghosts time = nGhosts
     applicableGhosts  =   map (setGhostToState ghostState time) adjustableGhosts
     nGhosts = applicableGhosts ++ nonApplicableGhosts
 
+-- Implicitly forcing a ghost into a new state accomponied with the timestamp for activity trigger
 setGhostToState::GhostState->Float->Player->Player
 setGhostToState nState time = \g -> g {state=nState, timestamp=time}
 
-
+-- * Checking if switching the state of a ghost is allowed
 ghostTransitionAllowed::GhostState->GhostState->Bool
 ghostTransitionAllowed Frightened Idle = False
 ghostTransitionAllowed _  _ = True
 
 
+-- * Checking if a ghost is non lethal
 isNonLethal::Player->Bool
 isNonLethal (Ghost _ _ state _ _ _) = elem state getNonLethalGhostStates
 
+
+-- * Checking if a ghost is lethal
 isLethal::Player->Bool
 isLethal ghost = not $ isNonLethal ghost
 
+
+-- * Checking if a ghost is a specific state
 isStateGhost::GhostState->Player->Bool
 isStateGhost state (Ghost _ _ gState _ _ _) = gState == state
 
+
+
+-- * Checking if a ghost is a specific state
 isNotStateGhost::GhostState->Player->Bool
-isNotStateGhost state (Ghost _ _ gState _ _ _) = gState /= state
+isNotStateGhost state g@(Ghost _ _ gState _ _ _) = gState /= state
 
 
+
+-- * Checking if a player type is not on another player type
 samePosition::(Int, Int) -> Player -> Bool
 samePosition pos = \x -> (position x) == pos
 
+
+-- * Checking if a player type isn't on another player type
 notSamePosition::(Int, Int) -> Player -> Bool
 notSamePosition pos = \x -> (position x) /= pos
 
 
+-- * Checking if a frightened ghost is located on top of a player
 frightenedGhostsOnPlayer::[Player] -> [Player]
 frightenedGhostsOnPlayer players = filter (isStateGhost Frightened) players
 
+
+-- * The states that define if a player can't be hurt.
 getNonLethalGhostStates::[GhostState]
 getNonLethalGhostStates = [Retreat, Frightened]
 
+-- * The positions of the ghosts that can't hurt the player
 getNonLethalGhosts::[Player] -> [Player]
 getNonLethalGhosts ghosts = filter (isNonLethal) ghosts
 
+
+-- * The positions of the ghosts that can hurt the players
 getDeadlyGhostsPosition::Ghosts -> [(Int, Int)]
 getDeadlyGhostsPosition players = getGhostsPosition $ filter (isLethal) players
 
@@ -256,6 +292,7 @@ getTotalRoute (Ghost _ CYAN _ _ _ _) = [LEFT, LEFT, UP, RIGHT, UP, RIGHT, DOWN, 
 getTotalRoute (Ghost _ PINK _ _ _ _) = [DOWN, DOWN, RIGHT, UP, LEFT]
 getTotalRoute (Ghost _ RED _ _ _ _) = [DOWN, DOWN, LEFT, UP, RIGHT]
 
+-- ** The start positions for the ghosts
 getScatterStart :: GhostColor -> (Int, Int)
 getScatterStart RED = (27,2)
 getScatterStart PINK = (2,2)
@@ -263,34 +300,12 @@ getScatterStart ORANGE = (2,29)
 getScatterStart CYAN = (27,29)
 
 
--- TODO currently angled walls arent used
 data WallType = VERTICAL | LANGLE | RANGLE | HORIZONTAL deriving (Show, Eq)
 
 
-boardWidth :: Int
-boardWidth = 28
 
-boardHeight :: Int
-boardHeight = 31
 
-screenWidth :: Int
-screenWidth = 1000
-
-screenHeight :: Int
-screenHeight = 1000
-
-originHeight :: Float
-originHeight = fromIntegral (-235)
-
-originWidth :: Float
-originWidth = fromIntegral (240)
-
-cellWidth :: Float
-cellWidth = fromIntegral screenWidth / fromIntegral boardWidth
-
-cellHeight :: Float
-cellHeight = fromIntegral screenHeight / fromIntegral boardHeight
-
+-- The default world (Keep in mind that this goes on for a while, its 868 records of map)
 getDefaultWorld :: World
 getDefaultWorld =
   [ NotWalkable HORIZONTAL (1, 1),

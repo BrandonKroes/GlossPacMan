@@ -10,13 +10,14 @@ import Model
 
 -- Updating the ghost
 updateGhosts :: GameState -> IO GameState
-updateGhosts gstate = do 
+updateGhosts gstate = do
                       newGhostlist <- mapM (updateGhost gstate) (ghosts gstate)
                       return (gstate {ghosts = newGhostlist})
 
+-- * Based on the state of the ghost, the corresponding function call is made.
 updateGhost :: GameState -> Player -> IO Player
 updateGhost gstate g@(Ghost _ _ Frightened _ _ _) = updateGhostByFrightened gstate g
-updateGhost gstate g@(Ghost _ _ Retreat _ _ _) = return (updateGhostByRetreat gstate g) 
+updateGhost gstate g@(Ghost _ _ Retreat _ _ _) = return (updateGhostByRetreat gstate g)
 updateGhost gstate g@(Ghost _ _ Idle _ _ _) = return (updateGhostByIdle gstate g)           -- This one needs to be made explicitly clear
 updateGhost gstate g@(Ghost _ _ _ timestamp _ _ )
             | (time gstate) >= (timestamp) = return (flipGhostStateHunt gstate g)
@@ -39,15 +40,15 @@ updateGhostByScatterPlace gstate ghost@(Ghost gPos color gState@ToScatterPlace _
   where
     (pos, state) = nextPosScatter gstate gPos (getScatterStart color)
 
-updateGhostByIdle :: GameState -> Player -> Player 
+updateGhostByIdle :: GameState -> Player -> Player
 updateGhostByIdle gstate ghost@(Ghost _ RED _ _ _ _) = updateIdleGhost ghost gstate 0
 updateGhostByIdle gstate ghost@(Ghost _ PINK _ _ _ _) = updateIdleGhost ghost gstate 0
 updateGhostByIdle gstate ghost@(Ghost _ ORANGE _ _ _ _) = updateIdleGhost ghost gstate 60
 updateGhostByIdle gstate ghost@(Ghost _ CYAN _ _ _ _) = updateIdleGhost ghost gstate 30
 
 
-updateGhostByChase :: GameState -> Player -> Player 
-updateGhostByChase gstate ghost@(Ghost (gx, gy) ORANGE _ _ _ _) = 
+updateGhostByChase :: GameState -> Player -> Player
+updateGhostByChase gstate ghost@(Ghost (gx, gy) ORANGE _ _ _ _) =
   if distance > 8 then ghost{position = newPosRed} else ghost{state = ToScatterPlace} -- follow reds tacic
   where
     (px, py) = (position (player gstate)) -- get position of pacman
@@ -74,13 +75,13 @@ updateGhostByChase _ g = g
 
 -- Let the ghost walk to the return base. Switch state to Idle if destination has been reached
 updateGhostByRetreat :: GameState -> Player -> Player
-updateGhostByRetreat gstate g@(Ghost gPos color gState t s d) = 
+updateGhostByRetreat gstate g@(Ghost gPos color gState t s d) =
   let (r:o:p:c:xs) = map position (ghosts runningGameState)  -- get the begin position of all different color ghosts
       newPos = case color of
                 RED -> updateGposAstar gstate gPos r
                 PINK -> updateGposAstar gstate gPos  p
                 ORANGE -> updateGposAstar gstate gPos  o
-                CYAN -> updateGposAstar gstate gPos  c  in 
+                CYAN -> updateGposAstar gstate gPos  c  in
   if gPos == newPos then g{state = Idle} else g{position = newPos}
 
 
@@ -98,9 +99,10 @@ flipGhostStateHunt gstate g@(Ghost gPos gColor (Scatter _) timestamp sequenc dir
     newGhost =  setGhostToState Chase ((time gstate) + fromIntegral newTimeOutTime) (Ghost gPos gColor Chase timestamp newSequenceNumber direction)
 flipGhostStateHunt gstate ghost = ghost
 
-
+-- * If the ghost is frightened, the ghost will remain frightened for a fixed amount of time.
+-- * In this function the timestamp (decided upon switching to frightened) has passed.
 updateGhostByFrightened:: GameState -> Player -> IO Player
-updateGhostByFrightened gstate ghost@(Ghost _ _ Frightened timestamp _ _) 
+updateGhostByFrightened gstate ghost@(Ghost _ _ Frightened timestamp _ _)
     | (time gstate) >= (timestamp) = return (setGhostToState Chase (time gstate) ghost)
     | otherwise = updateRandomPos gstate ghost
 updateGhostByFrightened gstate ghost = return ghost
@@ -114,21 +116,13 @@ randomElementFromList list = do
   return $ list !! r
 
 updateRandomPos :: GameState -> Player -> IO Player
-updateRandomPos gstate g@(Ghost curr _ _ _ _ direction) = 
+updateRandomPos gstate g@(Ghost curr _ _ _ _ direction) =
   let new_pos = calculateNextPosition curr direction in
     case positionWalkable new_pos gstate of
       True -> return g{position = new_pos}
-      _    -> do 
-                newDir <- randomElementFromList [ x | x <- [UP, DOWN, RIGHT, LEFT], x /= direction ] 
+      _    -> do
+                newDir <- randomElementFromList [ x | x <- [UP, DOWN, RIGHT, LEFT], x /= direction ]
                 return g{gDirection = newDir}
-
-
-pickNewRandomPosition :: Player -> GameState -> Player
-pickNewRandomPosition g@(Ghost gPos gColor Frightened timestamp sequenc direction) gstate = g{position = newPos}
-  where
-    newPosOptions = (getWalkableNeighborTilePositions gstate gPos) ++ [gPos]
-    amountOfOptions = length newPosOptions
-    newPos = unsafePerformIO $ randomElementFromList newPosOptions
 
 -- update the position with one step into the shortest path to the destination
 updateGposAstar :: GameState -> (Int, Int) -> (Int, Int) -> (Int, Int)
@@ -145,7 +139,7 @@ nextPosScatter gstate start des = let new_pos = updateGposAstar gstate start des
 
 -- for the scatter ghosts: walk the route. If you can take the next turn, take it and update your directionlist
 getNewDirPos:: Player -> GameState -> ((Int,Int), [Direction])
-getNewDirPos ghost@(Ghost gPos gColor (Scatter route) _ _ _) gstate = 
+getNewDirPos ghost@(Ghost gPos gColor (Scatter route) _ _ _) gstate =
   case route of
     (x:y:xs) -> let new_pos = calculateNextPosition gPos y in
                   case positionWalkable new_pos gstate of
@@ -167,4 +161,3 @@ updateIdleGhost:: Player -> GameState -> Int -> Player
 updateIdleGhost ghost@(Ghost gPos gColor Idle timestamp sequence direction) gstate minCoins =
   if (consumablesTotal gstate) - (consumablesLeft gstate) >= minCoins then ghost{state = Chase} else ghost
 updateIdleGhost g _ _ = g
-

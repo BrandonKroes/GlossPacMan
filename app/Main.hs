@@ -49,8 +49,11 @@ main = do
   gOrange2 <- pngByFile "orange2.png"
   gFrightened2 <- pngByFile "frightened2.png"
 
-
+  -- Making a list of all assets
   let assets = Map.fromList [ ("pacmanUp2", pacmanUp2),    ("pacmanDown2", pacmanDown2),    ("pacmanLeft2", pacmanLeft2),    ("pacmanRight2", pacmanRight2),    ("pacmanUp", pacmanUp),    ("pacmanDown", pacmanDown),    ("pacmanLeft", pacmanLeft),    ("pacmanRight", pacmanRight),    ("gRed", gRed),    ("gPink", gPink),    ("gCyan", gCyan),    ("gOrange", gOrange),    ("gFrightened", gFrightened),    ("gRetreat", gRetreat),    ("gRed2", gRed2),    ("gPink2", gPink2), ("gCyan2", gCyan2),    ("gOrange2", gOrange2),    ("gFrightened2", gFrightened2),    ("door" , door ),    ("vWall", vWall),    ("hWall", hWall),    ("empty", emptySpace),    ("coin", coin),    ("dot", dot)  ]
+
+
+  -- The Gloss IO call to initialise the game.
   playIO window black fps (initialGameState assets) render inputHandler update
 
 -- render -> rendering.hs

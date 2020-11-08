@@ -8,8 +8,9 @@ import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
 
 
--- Render override can decide to throw away all the pics.
--- Purposefully not using pattern matching, because it would cause 5 gigantic lines to adjust each time the code base changes
+-- ** Render override can decide to throw away all the pics.
+-- ** Decides which special condition screen can be showed base on the runningGameState
+-- ***Purposefully not using pattern matching, because it would cause 5 gigantic lines to adjust each time the code base changes
 renderOverride::GameState -> [Picture] -> [Picture]
 renderOverride gstate frames | LOST == (runningState gstate) = getLostText gstate
                              | WON  == (runningState gstate) = getWonText
@@ -17,6 +18,8 @@ renderOverride gstate frames | LOST == (runningState gstate) = getLostText gstat
                              | PAUSE == (runningState gstate) = getPauseText
                              | otherwise = frames
 
+
+-- ** Returns the text view if a player lost.
 getLostText::GameState->[Picture]
 getLostText gstate = [(translatePicture(-100, 0  ) (color green (text "YOU LOSE"))),
               (translatePicture (200, 100) (getScoreText)),
@@ -26,18 +29,21 @@ getLostText gstate = [(translatePicture(-100, 0  ) (color green (text "YOU LOSE"
               (translatePicture (-100, 590) (color red   (text "TRY AGAIN")))]
 
 
+-- ** Returns the text view if a player pauses the game.
 getPauseText::[Picture]
 getPauseText = [(translatePicture (-100, 0) (color green (text "PAUSED"))),
               (translatePicture (-100, 350) (color blue (text "PRESS 'P'"))),
               (translatePicture (-100, 470) (color blue (text " TO"))),
               (translatePicture (-100, 590) (color blue (text "CONTINUE")))]
 
+-- ** Returns the text view if a player wins.
 getWonText::[Picture]
 getWonText = [(translatePicture (-100, 0) (color green (text "YOU WIN"))),
               (translatePicture (-100, 350) (color blue (text "PRESS ANY"))),
               (translatePicture (-100, 470) (color blue (text " KEY TO"))),
               (translatePicture (-100, 590) (color blue (text "GO AGAIN")))]
 
+-- ** Returns the text view if a player is on the start screen.
 getStartText::[Picture]
 getStartText = [(translatePicture (-100, 0) (color green (text "WELCOME!"))),
               (translatePicture (-100, 350) (color yellow (text "PRESS ANY"))),

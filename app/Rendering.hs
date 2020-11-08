@@ -5,7 +5,6 @@ import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
 
 -- Custom packages
-import AssetManager
 import Model
 import Render.Override
 import Render.Player

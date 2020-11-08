@@ -10,7 +10,7 @@ import Logic.World
 import Logic.Conditions
 import Model
 
--- The execution order of the gamestate is import for change detection
+-- The Update function is called every frame and calls all the update calls from the logic module.
 update :: Float -> GameState -> IO GameState
 update currentFT gstate
   -- check if the game is paused
@@ -20,7 +20,7 @@ update currentFT gstate
                    c2 <- conditions uG
                    return (updateWorld $ c2)
 
-
+-- * This function is used to handle user input when the player isn't playing the game (So on a start or stop screen)
 inputHandler :: Event -> GameState -> IO GameState
 inputHandler event gstate
   | (runningState gstate) /= RUNNING = case event of
@@ -29,6 +29,7 @@ inputHandler event gstate
                                         _ -> return gstate
   | otherwise = return (runningInputHandler event gstate)
 
+-- * This function is applied when the game is playing.
 runningInputHandler::Event -> GameState -> GameState
 runningInputHandler event gstate
     | not (isPaused gstate) = case event of
@@ -41,4 +42,3 @@ runningInputHandler event gstate
    | otherwise = case event of
                  EventKey (Char 'p') Down _ _ -> flipPause gstate
                  _ -> gstate
-
